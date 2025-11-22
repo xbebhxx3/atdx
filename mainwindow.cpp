@@ -139,9 +139,9 @@ namespace
           || (type == 6 && !msg_parts.filter ("73").isEmpty ()));
   }
 
-  int ms_minute_error (JTDXDateTime * jtdxtime)
+  int ms_minute_error (atdxDateTime * atdxtime)
   {
-    auto const& now = jtdxtime->currentDateTime2 ();
+    auto const& now = atdxtime->currentDateTime2 ();
     auto const& time = now.time ();
     auto second = time.second ();
     return now.msecsTo (now.addSecs (second > 30 ? 60 - second : -second)) - time.msec ();
@@ -154,7 +154,7 @@ MainWindow::MainWindow(bool multiple, QSettings * settings, QSharedMemory *shdme
                        QProcessEnvironment const& env, QWidget *parent) :
   QMainWindow(parent),
   m_exitCode {0},
-  m_jtdxtime {new JTDXDateTime()},
+  m_atdxtime {new atdxDateTime()},
 
   m_env {env},
   m_dataDir {QStandardPaths::writableLocation (QStandardPaths::DataLocation)},
@@ -169,15 +169,15 @@ MainWindow::MainWindow(bool multiple, QSettings * settings, QSharedMemory *shdme
 
   m_WSPR_band_hopping {settings, &m_config, this},
   m_WSPR_tx_next {false},
-  m_wideGraph (new WideGraph(settings, m_jtdxtime)),
-  m_logDlg (new LogQSO (settings, &m_config, m_jtdxtime, this)),
+  m_wideGraph (new WideGraph(settings, m_atdxtime)),
+  m_logDlg (new LogQSO (settings, &m_config, m_atdxtime, this)),
   m_lastDialFreq {145000000},
   //m_dialFreq {std::numeric_limits<Radio::Frequency>::max ()},
   m_dialFreqRxWSPR {0},
-  m_detector {new Detector {RX_SAMPLE_RATE, double(NTMAX), m_jtdxtime , downSampleFactor}},
+  m_detector {new Detector {RX_SAMPLE_RATE, double(NTMAX), m_atdxtime , downSampleFactor}},
   m_FFTSize {6912 / 2},         // conservative value to avoid buffer overruns
   m_soundInput {new SoundInput},
-  m_modulator {new Modulator {TX_SAMPLE_RATE, NTMAX, m_jtdxtime}},
+  m_modulator {new Modulator {TX_SAMPLE_RATE, NTMAX, m_atdxtime}},
   m_soundOutput {new SoundOutput},
   m_rx_audio_buffer_frames {0},
   m_tx_audio_buffer_frames {0},
@@ -419,9 +419,9 @@ MainWindow::MainWindow(bool multiple, QSettings * settings, QSharedMemory *shdme
       "ZK1S", "ZK2", "ZK3", "ZL", "ZL7", "ZL8", "ZL9", "ZP", "ZS", "ZS8"
       },
   m_sfx {"P",  "0",  "1",  "2",  "3",  "4",  "5",  "6",  "7",  "8",  "9",  "A"},
-  m_dateTimeQSOOn {m_jtdxtime->currentDateTimeUtc2()},
+  m_dateTimeQSOOn {m_atdxtime->currentDateTimeUtc2()},
   m_status {QsoHistory::NONE},
-  mem_jtdxjt9 {shdmem},
+  mem_atdxjt9 {shdmem},
   m_downSampleFactor (downSampleFactor),
   m_audioThreadPriority (QThread::HighPriority),
 //  m_audioThreadPriority (QThread::HighestPriority),
@@ -450,11 +450,11 @@ MainWindow::MainWindow(bool multiple, QSettings * settings, QSharedMemory *shdme
   m_manual {network_manager}
 {
   ui->setupUi(this);
-  m_config.set_jtdxtime (m_jtdxtime);
+  m_config.set_atdxtime (m_atdxtime);
   ui->decodedTextBrowser->setConfiguration (&m_config);
   ui->decodedTextBrowser2->setConfiguration (&m_config);
-  m_qsoHistory.jtdxtime = m_jtdxtime;
-  m_qsoHistory2.jtdxtime = m_jtdxtime; 
+  m_qsoHistory.atdxtime = m_atdxtime;
+  m_qsoHistory2.atdxtime = m_atdxtime; 
   m_baseCall = Radio::base_callsign (m_config.my_callsign ());
  
   m_optimizingProgress.setWindowModality (Qt::WindowModal);
@@ -468,10 +468,10 @@ MainWindow::MainWindow(bool multiple, QSettings * settings, QSharedMemory *shdme
   // parts of the rig error message box that are fixed
 
   m_rigErrorMessageBox.setInformativeText (tr ("Do you want to reconfigure the radio interface?"));
-  m_rigErrorMessageBox.setStandardButtons (JTDXMessageBox::Cancel | JTDXMessageBox::Ok | JTDXMessageBox::Retry);
-  m_rigErrorMessageBox.setDefaultButton (JTDXMessageBox::Ok);
+  m_rigErrorMessageBox.setStandardButtons (atdxMessageBox::Cancel | atdxMessageBox::Ok | atdxMessageBox::Retry);
+  m_rigErrorMessageBox.setDefaultButton (atdxMessageBox::Ok);
   m_rigErrorMessageBox.translate_buttons();
-  m_rigErrorMessageBox.setIcon (JTDXMessageBox::Critical);
+  m_rigErrorMessageBox.setIcon (atdxMessageBox::Critical);
 
   // start audio thread and hook up slots & signals for shutdown management
   // these objects need to be in the audio thread so that invoking
@@ -481,9 +481,9 @@ MainWindow::MainWindow(bool multiple, QSettings * settings, QSharedMemory *shdme
   m_soundInput->moveToThread (&m_audioThread);
   m_detector->moveToThread (&m_audioThread);
   bool ok;
-  auto buffer_size = env.value ("JTDX_RX_AUDIO_BUFFER_FRAMES", "0").toInt (&ok);
+  auto buffer_size = env.value ("atdx_RX_AUDIO_BUFFER_FRAMES", "0").toInt (&ok);
   m_rx_audio_buffer_frames = ok && buffer_size ? buffer_size : default_rx_audio_buffer_frames;
-  buffer_size = env.value ("JTDX_TX_AUDIO_BUFFER_FRAMES", "0").toInt (&ok);
+  buffer_size = env.value ("atdx_TX_AUDIO_BUFFER_FRAMES", "0").toInt (&ok);
   m_tx_audio_buffer_frames = ok && buffer_size ? buffer_size : default_tx_audio_buffer_frames;
   // hook up sound output stream slots & signals and disposal
   connect (this, &MainWindow::initializeAudioOutputStream, m_soundOutput, &SoundOutput::setFormat);
@@ -738,20 +738,20 @@ MainWindow::MainWindow(bool multiple, QSettings * settings, QSharedMemory *shdme
 
   createStatusBar();
 
-  connect(&proc_jtdxjt9, &QProcess::readyReadStandardOutput,this, &MainWindow::readFromStdout);
+  connect(&proc_atdxjt9, &QProcess::readyReadStandardOutput,this, &MainWindow::readFromStdout);
 #if QT_VERSION < QT_VERSION_CHECK (5, 6, 0)
-  connect(&proc_jtdxjt9, static_cast<void (QProcess::*) (QProcess::ProcessError)> (&QProcess::error),
+  connect(&proc_atdxjt9, static_cast<void (QProcess::*) (QProcess::ProcessError)> (&QProcess::error),
           [this] (QProcess::ProcessError error) {
-            subProcessError (&proc_jtdxjt9, error);
+            subProcessError (&proc_atdxjt9, error);
           });
 #else
-  connect(&proc_jtdxjt9, &QProcess::errorOccurred, [this] (QProcess::ProcessError error) {
-                                                 subProcessError (&proc_jtdxjt9, error);
+  connect(&proc_atdxjt9, &QProcess::errorOccurred, [this] (QProcess::ProcessError error) {
+                                                 subProcessError (&proc_atdxjt9, error);
                                                });
 #endif
-  connect(&proc_jtdxjt9, static_cast<void (QProcess::*) (int, QProcess::ExitStatus)> (&QProcess::finished),
+  connect(&proc_atdxjt9, static_cast<void (QProcess::*) (int, QProcess::ExitStatus)> (&QProcess::finished),
           [this] (int exitCode, QProcess::ExitStatus status) {
-            if (subProcessFailed (&proc_jtdxjt9, exitCode, status))
+            if (subProcessFailed (&proc_atdxjt9, exitCode, status))
               {
                 m_valid = false;          // ensures exit if still
                                           // constructing
@@ -824,7 +824,7 @@ MainWindow::MainWindow(bool multiple, QSettings * settings, QSharedMemory *shdme
       auto const& result = m_saveWAVWatcher.future ().result ();
       if (!result.isEmpty ())   // error
         {
-          JTDXMessageBox::critical_message (this, "", tr("Error Writing WAV File"), result);
+          atdxMessageBox::critical_message (this, "", tr("Error Writing WAV File"), result);
         }
     });
 
@@ -964,9 +964,9 @@ MainWindow::MainWindow(bool multiple, QSettings * settings, QSharedMemory *shdme
     {
       while(true)
         {
-          int iret=killbyname("jtdxjt9.exe");
+          int iret=killbyname("atdxjt9.exe");
           if(iret == 603) break;
-            JTDXMessageBox::warning_message (this, "", tr ("Error Killing jtdxjt9.exe Process")
+            atdxMessageBox::warning_message (this, "", tr ("Error Killing atdxjt9.exe Process")
                                          , tr ("KillByName return code: %1")
                                          .arg (iret));
         }
@@ -977,20 +977,20 @@ MainWindow::MainWindow(bool multiple, QSettings * settings, QSharedMemory *shdme
 
   {
     //delete any .quit file that might have been left lying around
-    //since its presence will cause jtdxjt9 to exit a soon as we start it
+    //since its presence will cause atdxjt9 to exit a soon as we start it
     //and decodes will hang
     QFile quitFile {m_config.temp_dir ().absoluteFilePath (".quit")};
     while (quitFile.exists ())
       {
         if (!quitFile.remove ())
           {
-            JTDXMessageBox::query_message (this, "", tr ("Error removing \"%1\"").arg (quitFile.fileName ())
+            atdxMessageBox::query_message (this, "", tr ("Error removing \"%1\"").arg (quitFile.fileName ())
                                        , tr ("Click OK to retry"));
           }
       }
   }
 
-  //Create .lock so jtdxjt9 will wait
+  //Create .lock so atdxjt9 will wait
   QFile {m_config.temp_dir ().absoluteFilePath (".lock")}.open(QIODevice::ReadWrite);
 
   QStringList jt9_args {
@@ -1016,9 +1016,9 @@ MainWindow::MainWindow(bool multiple, QSettings * settings, QSharedMemory *shdme
       };
   QProcessEnvironment new_env {m_env};
   new_env.insert  ("OMP_STACKSIZE", "10M");
-  proc_jtdxjt9.setProcessEnvironment (new_env);
-  proc_jtdxjt9.start(QDir::toNativeSeparators (m_appDir) + QDir::separator () +
-          "jtdxjt9", jt9_args, QIODevice::ReadWrite | QIODevice::Unbuffered);
+  proc_atdxjt9.setProcessEnvironment (new_env);
+  proc_atdxjt9.start(QDir::toNativeSeparators (m_appDir) + QDir::separator () +
+          "atdxjt9", jt9_args, QIODevice::ReadWrite | QIODevice::Unbuffered);
 
   QString fname {QDir::toNativeSeparators(m_dataDir.absoluteFilePath ("wsjtx_wisdom.dat"))};
   QByteArray cfname=fname.toLocal8Bit();
@@ -1028,9 +1028,9 @@ MainWindow::MainWindow(bool multiple, QSettings * settings, QSharedMemory *shdme
 
   connect (&m_wav_future_watcher, &QFutureWatcher<void>::finished, this, &MainWindow::diskDat);
 
-#if JTDX_DEBUG_TO_FILE
-  FILE * pFile = fopen (QDir(QStandardPaths::writableLocation (QStandardPaths::DataLocation)).absoluteFilePath ("jtdx_debug.txt").toStdString().c_str(),"a");  
-  fprintf (pFile,"%s(%0.1f) JTDX v%s start, performance %d threads\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_jtdxtime->GetOffset(),
+#if atdx_DEBUG_TO_FILE
+  FILE * pFile = fopen (QDir(QStandardPaths::writableLocation (QStandardPaths::DataLocation)).absoluteFilePath ("atdx_debug.txt").toStdString().c_str(),"a");  
+  fprintf (pFile,"%s(%0.1f) atdx v%s start, performance %d threads\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_atdxtime->GetOffset(),
       (version() + (m_tci ? " tci " : " ") + revision()).toStdString().c_str(),QThread::idealThreadCount ());
   fclose (pFile);
 #endif
@@ -1066,7 +1066,7 @@ MainWindow::MainWindow(bool multiple, QSettings * settings, QSharedMemory *shdme
   m_wideGraph->setTopJT65(m_config.ntopfreq65());
   m_wideGraph->setModeTx(m_modeTx);
   
-  minuteTimer.start (ms_minute_error (m_jtdxtime) + 60 * 1000);
+  minuteTimer.start (ms_minute_error (m_atdxtime) + 60 * 1000);
   
   if(m_mode=="FT8") on_actionFT8_triggered();
   else if(m_mode=="FT4") on_actionFT4_triggered();
@@ -1138,7 +1138,7 @@ MainWindow::MainWindow(bool multiple, QSettings * settings, QSharedMemory *shdme
   if(!ui->cbShowWanted->isChecked()) { ui->cbShowWanted->setChecked(true); ui->cbShowWanted->setChecked(false); }
   m_oldmode=m_mode;
   mode_label->setText(m_mode);
-  m_lastloggedtime=m_jtdxtime->currentDateTimeUtc2().addSecs(-7*int(m_TRperiod));
+  m_lastloggedtime=m_atdxtime->currentDateTimeUtc2().addSecs(-7*int(m_TRperiod));
   QFile f0 {m_dataDir.absoluteFilePath ("CALL3.TXT")};
   if(!f0.exists()) { 
   QFile f1 {m_config.data_dir ().absoluteFilePath ("CALL3.TXT")};
@@ -1150,7 +1150,7 @@ MainWindow::MainWindow(bool multiple, QSettings * settings, QSharedMemory *shdme
   ui->spotMsgLabel->setVisible(false); ui->spotEditLabel->setVisible(false);  ui->spotLineEdit->setVisible(false); ui->propEditLabel->setVisible(false); ui->propLineEdit->setVisible(false);
   ui->genStdMsgsPushButton->click ();
   ui->spotMsgLabel->setTextFormat(Qt::PlainText);
-  m_mslastTX = m_jtdxtime->currentMSecsSinceEpoch2();
+  m_mslastTX = m_atdxtime->currentMSecsSinceEpoch2();
   m_multInst=QApplication::applicationName ().length()>4;
   foxgen_(); ui->actionLatvian->setEnabled(false); ui->actionDutch->setEnabled(false);//temporarily disable
 
@@ -1631,7 +1631,7 @@ void MainWindow::setStopHSym()
 // init labUTC clock stylesheet at SW start and operation
 void MainWindow::setClockStyle(bool reset)
 {
-  QDateTime t = m_jtdxtime->currentDateTimeUtc2();
+  QDateTime t = m_atdxtime->currentDateTimeUtc2();
   QString minute = t.time().toString("mm");
   QString second = t.time().toString("ss");
   QString secms = t.time().toString("ss.zzz");
@@ -1737,11 +1737,11 @@ void MainWindow::writeHaltTxEvent(QString reason)
   bool haltTrans=false;
   if(!m_transmitting && g_iptt==1) haltTrans=true;
   if(m_config.write_decoded_debug()) {
-    QFile f {m_dataDir.absoluteFilePath (m_jtdxtime->currentDateTimeUtc2().toString("yyyyMM_")+"ALL.TXT")};
+    QFile f {m_dataDir.absoluteFilePath (m_atdxtime->currentDateTimeUtc2().toString("yyyyMM_")+"ALL.TXT")};
     if (f.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append)) {
        QTextStream out(&f);
        if(m_transmitting) {
-          out << m_jtdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz") << "(" << m_jtdxtime->GetOffset() << ")"
+          out << m_atdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz") << "(" << m_atdxtime->GetOffset() << ")"
               << "  Halt Tx triggered at TX: " << reason << qSetRealNumberPrecision (12) << (m_freqNominal / 1.e6)
               << " MHz  " << m_modeTx
               << ":  " << m_currentMessage <<
@@ -1753,7 +1753,7 @@ void MainWindow::writeHaltTxEvent(QString reason)
 
        } else {
           if(!haltTrans) {
-             out << m_jtdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz") << "(" << m_jtdxtime->GetOffset() << ")"
+             out << m_atdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz") << "(" << m_atdxtime->GetOffset() << ")"
                  << "  Halt Tx triggered at RX: " << reason <<
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
                  endl;
@@ -1762,7 +1762,7 @@ void MainWindow::writeHaltTxEvent(QString reason)
 #endif
 
           } else {			  
-             out << m_jtdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz") << "(" << m_jtdxtime->GetOffset() << ")"
+             out << m_atdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz") << "(" << m_atdxtime->GetOffset() << ")"
                  << "  Halt Tx triggered at transition from RX to TX: " << reason <<
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
                  endl;
@@ -1774,7 +1774,7 @@ void MainWindow::writeHaltTxEvent(QString reason)
        }
        f.close();
     } else {
-       JTDXMessageBox::warning_message (this, "", tr ("File Open Error")
+       atdxMessageBox::warning_message (this, "", tr ("File Open Error")
                                     , tr ("Cannot open \"%1\" for append: %2")
                                     .arg (f.fileName ()).arg (f.errorString ()));
     }
@@ -1792,7 +1792,7 @@ void MainWindow::dataSink(qint64 frames)
   static int npts8;
   static float px=0.0;
   static float df3;
-  static QDateTime last {m_jtdxtime->currentDateTimeUtc2().addSecs(-300)};
+  static QDateTime last {m_atdxtime->currentDateTimeUtc2().addSecs(-300)};
   static bool lastdelayed {false};
 
   if(m_diskData) dec_data.params.ndiskdat=1; else dec_data.params.ndiskdat=0;
@@ -1806,7 +1806,7 @@ void MainWindow::dataSink(qint64 frames)
   symspec_(&dec_data,&k,&trmin,&nsps,&px,s,&df3,&ihsym,&npts8);
   if(m_mode=="WSPR-2") wspr_downsample_(dec_data.d2,&k);
   if(ihsym <=0) return;
-//  printf("%s(%0.1f) dataSink %s %d %d\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_jtdxtime->GetOffset(),last.toString("hh:mm:ss.zzz").toStdString().c_str(),ihsym,k);
+//  printf("%s(%0.1f) dataSink %s %d %d\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_atdxtime->GetOffset(),last.toString("hh:mm:ss.zzz").toStdString().c_str(),ihsym,k);
   QString t;
   t = QString::asprintf(" Rx noise: %5.1f ",px);
   ui->signal_meter_widget->setValue(px); // Update thermometer
@@ -1824,8 +1824,8 @@ void MainWindow::dataSink(qint64 frames)
     if(ihsym==1) nlostaudio=52-ihsymlast;
     ihsymlast=ihsym;
     if(nlostaudio > 0) {
-//printf("%s lost audio blocks %d \n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss").toStdString().c_str(),nlostaudio);
-      quint64 timedelta = m_jtdxtime->currentMSecsSinceEpoch2() - m_mslastMon;
+//printf("%s lost audio blocks %d \n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss").toStdString().c_str(),nlostaudio);
+      quint64 timedelta = m_atdxtime->currentMSecsSinceEpoch2() - m_mslastMon;
       if(timedelta > 14990) {
         if(nlostaudio < 3) ui->label_6->setStyleSheet(QString("QLabel{background: %1}").arg(Radio::convert_dark("#ffff00",m_useDarkStyle)));
         else ui->label_6->setStyleSheet(QString("QLabel{background: %1}").arg(Radio::convert_dark("#ff8000",m_useDarkStyle)));
@@ -1836,7 +1836,7 @@ void MainWindow::dataSink(qint64 frames)
       nlostaudio=0; m_lostaudio=true;
     }
     if(!m_diskData && m_mode=="FT8" && ihsym>45 && ihsym<nhsymEStopFT8 && m_delay==0) {
-      QDateTime now1 {m_jtdxtime->currentDateTimeUtc2 ()};
+      QDateTime now1 {m_atdxtime->currentDateTimeUtc2 ()};
       quint64 n1=now1.toMSecsSinceEpoch()%15000;
       if(n1>14735) {
         if(m_swl) ihsym=51; 
@@ -1861,7 +1861,7 @@ void MainWindow::dataSink(qint64 frames)
      || ((m_mode.startsWith("JT") || m_mode=="T10") && m_delay==0 && ihsym == m_hsymStop)
      || ((m_mode.startsWith("JT") || m_mode=="T10") && m_delay > 0 && ihsymdelay >= m_hsymStop)
      || (m_mode.startsWith("WSPR") && ihsym == m_hsymStop)) {
-    QDateTime now = m_jtdxtime->currentDateTimeUtc2 ();
+    QDateTime now = m_atdxtime->currentDateTimeUtc2 ();
 //prevent dupe decoding
     if(lastdelayed && !m_modeChanged) {
       if(m_mode=="FT8" && last.secsTo(now)<12) { lastdelayed=false; return; }
@@ -1904,7 +1904,7 @@ void MainWindow::dataSink(qint64 frames)
       if ((m_saveWav==2 || m_saveWav==1 || m_mode.mid (0,4) == "WSPR") && !m_fnameWE.isEmpty ())
          m_saveWAVWatcher.setFuture (QtConcurrent::run (std::bind (&MainWindow::save_wave_file,
              this, m_fnameWE, &dec_data.d2[0], samples, m_config.my_callsign(),
-             m_config.my_grid(), m_mode, m_freqNominal, m_hisCall, m_hisGrid,m_jtdxtime)));
+             m_config.my_grid(), m_mode, m_freqNominal, m_hisCall, m_hisGrid,m_atdxtime)));
 
       if (m_mode.mid (0,4) == "WSPR") {
         QString c2name_string {m_fnameWE + ".c2"};
@@ -1915,7 +1915,7 @@ void MainWindow::dataSink(qint64 frames)
         int nbfo=1500;
         double f0m1500=m_freqNominal/1000000.0 + nbfo - 1500;
         int err = savec2_(c2name,&nsec,&f0m1500,len1);
-        if (err!=0) JTDXMessageBox::warning_message (this, "", tr ("Error saving c2 file"), c2name);
+        if (err!=0) atdxMessageBox::warning_message (this, "", tr ("Error saving c2 file"), c2name);
       }
     }
 
@@ -1929,15 +1929,15 @@ void MainWindow::dataSink(qint64 frames)
       if(m_ndepth==3) depth_string=" -C 5000 -o 4";   //2 pass w subtract, Block detection and OSD.
 
       if(m_diskData) {
-        cmnd='"' + m_appDir + '"' + "/wsprd_jtdx " + depth_string + " -a \"" +
+        cmnd='"' + m_appDir + '"' + "/wsprd_atdx " + depth_string + " -a \"" +
             QDir::toNativeSeparators(m_dataDir.absolutePath()) + "\" \"" + m_path + "\"";
       } else {
-        cmnd='"' + m_appDir + '"' + "/wsprd_jtdx " + depth_string + " -a \"" +
+        cmnd='"' + m_appDir + '"' + "/wsprd_atdx " + depth_string + " -a \"" +
             QDir::toNativeSeparators(m_dataDir.absolutePath()) + "\" " +
             t2 + '"' + m_fnameWE + ".wav\"";
       }
       QString t3=cmnd;
-      int i1=cmnd.indexOf("/wsprd_jtdx ");
+      int i1=cmnd.indexOf("/wsprd_atdx ");
 //      cmnd=t3.left(i1+7) + t3.mid(i1+7);
       cmnd=t3.mid(0,i1+7) + t3.mid(i1+7);
       if(ui) ui->DecodeButton->setChecked (true);
@@ -1950,7 +1950,7 @@ void MainWindow::dataSink(qint64 frames)
 
 QString MainWindow::save_wave_file (QString const& name, short const * data, int samples,
         QString const& my_callsign, QString const& my_grid, QString const& mode,
-        Frequency frequency, QString const& his_call, QString const& his_grid,JTDXDateTime * jtdxtime) const
+        Frequency frequency, QString const& his_call, QString const& his_grid,atdxDateTime * atdxtime) const
 {
   //
   // This member function runs in a thread and should not access
@@ -1977,7 +1977,7 @@ QString MainWindow::save_wave_file (QString const& name, short const * data, int
   BWFFile::InfoDictionary list_info {
       {{{'I','S','R','C'}}, source.toLocal8Bit ()},
       {{{'I','S','F','T'}}, program_title (revision ()).simplified ().toLocal8Bit ()},
-      {{{'I','C','R','D'}}, jtdxtime->currentDateTime2 ()
+      {{{'I','C','R','D'}}, atdxtime->currentDateTime2 ()
                           .toString ("yyyy-MM-ddTHH:mm:ss.zzzZ").toLocal8Bit ()},
       {{{'I','C','M','T'}}, comment.toLocal8Bit ()},
   };
@@ -1991,8 +1991,8 @@ QString MainWindow::save_wave_file (QString const& name, short const * data, int
   return QString {};
 }
 
-void MainWindow::showSoundInError(const QString& errorMsg) { JTDXMessageBox::critical_message(this, "", tr("Error in SoundInput"), errorMsg); }
-void MainWindow::showSoundOutError(const QString& errorMsg) { JTDXMessageBox::critical_message(this, "", tr("Error in SoundOutput"), errorMsg); }
+void MainWindow::showSoundInError(const QString& errorMsg) { atdxMessageBox::critical_message(this, "", tr("Error in SoundInput"), errorMsg); }
+void MainWindow::showSoundOutError(const QString& errorMsg) { atdxMessageBox::critical_message(this, "", tr("Error in SoundOutput"), errorMsg); }
 void MainWindow::showStatusMessage(const QString& statusMsg) { statusBar()->showMessage(statusMsg); }
 
 void MainWindow::on_actionSettings_triggered()               //Setup Dialog
@@ -2029,7 +2029,7 @@ void MainWindow::on_actionSettings_triggered()               //Setup Dialog
         }
         m_baseCall = Radio::base_callsign (m_config.my_callsign ());
         ui->genStdMsgsPushButton->click ();
-        m_lastloggedtime=m_jtdxtime->currentDateTimeUtc2().addSecs(-7*int(m_TRperiod));
+        m_lastloggedtime=m_atdxtime->currentDateTimeUtc2().addSecs(-7*int(m_TRperiod));
         m_lastloggedcall.clear(); setLastLogdLabel();
         morse_(const_cast<char *> (m_config.my_callsign ().toLatin1().constData())
                , const_cast<int *> (icw)
@@ -2193,10 +2193,10 @@ void MainWindow::monitor (bool state)
   if (state) {
     m_diskData = false;	// no longer reading WAV files
     if (!m_monitoring) {
-      m_mslastMon=m_jtdxtime->currentMSecsSinceEpoch2();
+      m_mslastMon=m_atdxtime->currentMSecsSinceEpoch2();
       if (m_tci) Q_EMIT m_config.transceiver_audio(true);
       else Q_EMIT resumeAudioInputStream ();
-      QDateTime  currentTime = m_jtdxtime->currentDateTimeUtc2 (); // decode part of interval
+      QDateTime  currentTime = m_atdxtime->currentDateTimeUtc2 (); // decode part of interval
       QString curtime=currentTime.toString("ss.zzz");
       curtime.remove(2,1); curtime.remove(3,2);
       int curdsec = curtime.toInt();
@@ -2509,7 +2509,7 @@ void MainWindow::displayDialFrequency ()
         message =  tr ("Hound mode TX frequency control requires"
                                                             " *Split* rig control (either *Rig* or *Fake It* set"
                                                             " in the *Settings | Radio* tab.)");
-        JTDXMessageBox::warning_message (this, "", tr ("Hound TX frequency control warning"), message);
+        atdxMessageBox::warning_message (this, "", tr ("Hound TX frequency control warning"), message);
         ui->actionEnable_hound_mode->setChecked(false);
       } else {
         m_houndTXfreqJumps=!m_commonFT8b && m_config.split_mode() && m_config.rig_name() != "None";
@@ -2589,7 +2589,7 @@ void MainWindow::statusChanged()
 
     f.close();
   } else {
-    JTDXMessageBox::warning_message (this, "", tr ("File Open Error")
+    atdxMessageBox::warning_message (this, "", tr ("File Open Error")
                                  , tr ("Cannot open \"%1\" for append: %2")
                                  .arg (f.fileName ()).arg (f.errorString ()));
   }
@@ -2702,7 +2702,7 @@ bool MainWindow::subProcessFailed (QProcess * process, int exit_code, QProcess::
           if (argument.contains (' ')) argument = '"' + argument + '"';
           arguments << argument;
         }
-      JTDXMessageBox::critical_message (this, "", tr ("Subprocess Error")
+      atdxMessageBox::critical_message (this, "", tr ("Subprocess Error")
                                     , tr ("Subprocess failed with exit code %1")
                                     .arg (exit_code)
                                     , tr ("Running: %1\n%2")
@@ -2723,7 +2723,7 @@ void MainWindow::subProcessError (QProcess * process, QProcess::ProcessError)
           if (argument.contains (' ')) argument = '"' + argument + '"';
           arguments << argument;
         }
-      JTDXMessageBox::critical_message (this, "", tr ("Subprocess error")
+      atdxMessageBox::critical_message (this, "", tr ("Subprocess error")
                                     , tr ("Running: %1\n%2")
                                     .arg (process->program () + ' ' + arguments.join (' '))
                                     .arg (process->errorString ()));
@@ -2748,12 +2748,12 @@ void MainWindow::closeEvent(QCloseEvent * e)
 
   killFile ();
   m_killAll=true;
-  mem_jtdxjt9->detach();
+  mem_atdxjt9->detach();
   QFile quitFile {m_config.temp_dir ().absoluteFilePath (".quit")};
   quitFile.open(QIODevice::ReadWrite);
-  QFile {m_config.temp_dir ().absoluteFilePath (".lock")}.remove(); // Allow jtdxjt9 to terminate
-  bool b=proc_jtdxjt9.waitForFinished(1000);
-  if(!b) proc_jtdxjt9.close();
+  QFile {m_config.temp_dir ().absoluteFilePath (".lock")}.remove(); // Allow atdxjt9 to terminate
+  bool b=proc_atdxjt9.waitForFinished(1000);
+  if(!b) proc_atdxjt9.close();
   quitFile.remove();
   Q_EMIT finished ();
   QMainWindow::closeEvent (e);
@@ -2801,15 +2801,15 @@ void MainWindow::on_pbSpotDXCall_clicked ()
      QObject::disconnect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
 
      reply->abort();
-     JTDXMessageBox::critical_message(0, "", "Critical", tr("Can not establish/complete connection to dxsummit server"));
+     atdxMessageBox::critical_message(0, "", "Critical", tr("Can not establish/complete connection to dxsummit server"));
     }
     delete reply;
   }
 }
 
 void MainWindow::msgBox(QString t) { msgBox0.setText(t); msgBox0.translate_buttons(); msgBox0.exec(); }
-void MainWindow::on_actionJTDX_Web_Site_triggered() { m_manual.display_html_url (QUrl {PROJECT_MANUAL_DIRECTORY_URL}, PROJECT_MANUAL); }
-void MainWindow::on_actionJTDX_Forum_triggered() { m_manual.display_html_url (QUrl {"https://jtdx.freeforums.net/"}, ""); }
+void MainWindow::on_actionatdx_Web_Site_triggered() { m_manual.display_html_url (QUrl {PROJECT_MANUAL_DIRECTORY_URL}, PROJECT_MANUAL); }
+void MainWindow::on_actionatdx_Forum_triggered() { m_manual.display_html_url (QUrl {"https://atdx.freeforums.net/"}, ""); }
 
 /*Display local copy of manual
 void MainWindow::on_actionLocal_User_Guide_triggered()
@@ -2823,7 +2823,7 @@ void MainWindow::on_actionWide_Waterfall_triggered() { m_wideGraph->show(); } //
 
 void MainWindow::on_actionCopyright_Notice_triggered()
 {
-  JTDXMessageBox::information_message(this, "", tr("The algorithms, source code, look-and-feel of WSJT-X and related "
+  atdxMessageBox::information_message(this, "", tr("The algorithms, source code, look-and-feel of WSJT-X and related "
                            "programs, and protocol specifications for the modes FSK441, FT8, JT4, "
                            "JT6M, JT9, JT65, JTMS, QRA64, ISCAT, MSK144 are Copyright (C) "
                            "2001-2018 by one or more of the following authors: Joseph Taylor, "
@@ -2943,17 +2943,17 @@ void MainWindow::diskDat()                                   //diskDat()
       qApp->processEvents();                                //Update the waterfall
     }
   } else {
-    JTDXMessageBox::information_message(this, "", tr("No data read from disk. Wrong file format?"));
+    atdxMessageBox::information_message(this, "", tr("No data read from disk. Wrong file format?"));
   }
 }
 
 //Delete ../save/*.wav
 void MainWindow::on_actionDelete_all_wav_files_in_SaveDir_triggered()
 {
-  if (JTDXMessageBox::Yes == JTDXMessageBox::warning_message(this, "", tr("Confirm Delete"),
+  if (atdxMessageBox::Yes == atdxMessageBox::warning_message(this, "", tr("Confirm Delete"),
                                               tr("Are you sure you want to delete all *.wav and *.c2 files in\n") +
                                               QDir::toNativeSeparators(m_config.save_directory ().absolutePath ()) + " ?",
-                                              "", JTDXMessageBox::Yes | JTDXMessageBox::No, JTDXMessageBox::Yes)) {
+                                              "", atdxMessageBox::Yes | atdxMessageBox::No, atdxMessageBox::Yes)) {
     Q_FOREACH (auto const& file
                , m_config.save_directory ().entryList ({"*.wav", "*.c2"}, QDir::Files | QDir::Writable)) {
       m_config.save_directory ().remove (file);
@@ -3080,7 +3080,7 @@ void MainWindow::on_actionEnable_hound_mode_toggled(bool checked)
     message =  tr ("Hound mode TX frequency control requires"
                                                         " *Split* rig control (either *Rig* or *Fake It* set"
                                                         " in the *Settings | Radio* tab.)");
-    JTDXMessageBox::warning_message (this, "", tr ("Hound TX frequency control warning"), message);
+    atdxMessageBox::warning_message (this, "", tr ("Hound TX frequency control warning"), message);
     ui->actionEnable_hound_mode->setChecked(false);
     return;
   }
@@ -3177,7 +3177,7 @@ void MainWindow::on_actionKeyboard_shortcuts_triggered()
     m_shortcuts.reset (new HelpTextWindow {tr ("Keyboard Shortcuts"),
                                                //: Keyboard shortcuts help window contents
                                                tr (R"(<table cellspacing=1>
-  <tr><td><b>F1       </b></td><td>Online User's Guide</td><td><b>Ctrl+F1  </b></td><td>About JTDX</td></tr>
+  <tr><td><b>F1       </b></td><td>Online User's Guide</td><td><b>Ctrl+F1  </b></td><td>About atdx</td></tr>
   <tr><td><b>F2       </b></td><td>Open configuration window</td></tr>
   <tr><td><b>F3       </b></td><td>Display keyboard shortcuts</td></tr>
   <tr><td><b>F4       </b></td><td>Clear DX Call/Grid and Tx messages</td><td><b>Alt+F4   </b></td><td>Exit program</td></tr>
@@ -3287,7 +3287,7 @@ void MainWindow::decode()                                       //decode()
     if(m_curMsgTx.startsWith(m_hisCall+" ")) dec_data.params.nstophint = 0; // DxCall matched to last transmitted message
     m_lasthint=false;
   }
-//  printf("%s(%0.1f) Timing decode start: %d\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_jtdxtime->GetOffset(),dec_data.params.nstophint);
+//  printf("%s(%0.1f) Timing decode start: %d\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_atdxtime->GetOffset(),dec_data.params.nstophint);
   m_nDecodes = 0;
   m_reply_me = false;
   m_reply_other = false;
@@ -3297,7 +3297,7 @@ void MainWindow::decode()                                       //decode()
   m_used_freq = 0;
   if(m_diskData && !m_mode.startsWith("FT")) dec_data.params.nutc=dec_data.params.nutc/100;
   if(dec_data.params.newdat==1) {
-    m_msDecStarted=m_jtdxtime->currentMSecsSinceEpoch2();
+    m_msDecStarted=m_atdxtime->currentMSecsSinceEpoch2();
     if(!m_mode.startsWith("FT")) {
       qint64 ms = m_msDecStarted % 86400000;
       int imin=ms/60000;
@@ -3309,7 +3309,7 @@ void MainWindow::decode()                                       //decode()
   }
   if(dec_data.params.newdat==1 && (!m_diskData) && m_mode.startsWith("FT")) {
     qint64 ms=1000.0*(2.0-m_TRperiod);
-    QDateTime time=m_jtdxtime->currentDateTimeUtc2().addMSecs(ms);
+    QDateTime time=m_atdxtime->currentDateTimeUtc2().addMSecs(ms);
     int ihr=time.toString("hh").toInt();
     int imin=time.toString("mm").toInt();
     int isec=time.toString("ss").toInt();
@@ -3334,7 +3334,7 @@ void MainWindow::decode()                                       //decode()
   else  dec_data.params.lft8lowth=true;
   if(m_ft8Sensitivity==2) dec_data.params.lft8subpass=true;
   else dec_data.params.lft8subpass=false;
-  dec_data.params.ltxing=(m_enableTx && (m_jtdxtime->currentMSecsSinceEpoch2()-m_mslastTX) < 26000) ? 1 : 0;
+  dec_data.params.ltxing=(m_enableTx && (m_atdxtime->currentMSecsSinceEpoch2()-m_mslastTX) < 26000) ? 1 : 0;
   dec_data.params.lhidetest=(ui->actionHide_FT_contest_messages->isChecked() && !m_bypassAllFilters) ? 1 : 0;
   dec_data.params.lhidetelemetry=(ui->actionHide_telemetry_messages->isChecked() && !m_bypassAllFilters) ? 1 : 0;
   dec_data.params.lhideft8dupes=ui->actionHide_FT8_dupe_messages->isChecked() ? 1 : 0;
@@ -3413,7 +3413,7 @@ void MainWindow::decode()                                       //decode()
   //newdat=1  ==> this is new data, must do the big FFT
   //nagain=1  ==> decode only at fQSO +/- Tol
 
-  char *to = (char*)mem_jtdxjt9->data();
+  char *to = (char*)mem_atdxjt9->data();
   char *from = (char*) dec_data.ss;
   int size=sizeof(struct dec_data);
   if(dec_data.params.newdat==0) {
@@ -3422,8 +3422,8 @@ void MainWindow::decode()                                       //decode()
     from += noffset;
     size -= noffset;
   }
-  memcpy(to, from, qMin(mem_jtdxjt9->size(), size));
-  QFile {m_config.temp_dir ().absoluteFilePath (".lock")}.remove (); // Allow jtdxjt9 to start
+  memcpy(to, from, qMin(mem_atdxjt9->size(), size));
+  QFile {m_config.temp_dir ().absoluteFilePath (".lock")}.remove (); // Allow atdxjt9 to start
   if(m_config.write_decoded_debug()) {
     QString swl{""}, cycles{""};
     if(m_mode=="FT8") {
@@ -3433,7 +3433,7 @@ void MainWindow::decode()                                       //decode()
     else swl = (m_swl ? "SWL On " : "SWL Off ");
     writeToALLTXT("Decoder started " + swl + cycles);
   }
-//  m_msDecoderStarted = m_jtdxtime->currentMSecsSinceEpoch2();
+//  m_msDecoderStarted = m_atdxtime->currentMSecsSinceEpoch2();
 }
 
 void MainWindow::process_Auto()
@@ -3576,7 +3576,7 @@ void MainWindow::process_Auto()
         if(ui->tabWidget->currentIndex()==1) ui->genMsg->setText(ui->tx6->text());
     }
   }
-//  printf("%s(%0.1f) process_Auto: %s,%s,%s,%s,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_jtdxtime->GetOffset(),m_hisCall.toStdString().c_str(),hisCall.toStdString().c_str(),m_lastloggedcall.toStdString().c_str(),mode.toStdString().c_str(),m_status,prio,ui->TxFreqSpinBox->value (),m_used_freq,m_callMode,m_callPrioCQ,m_reply_other,m_reply_me,counters2);
+//  printf("%s(%0.1f) process_Auto: %s,%s,%s,%s,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_atdxtime->GetOffset(),m_hisCall.toStdString().c_str(),hisCall.toStdString().c_str(),m_lastloggedcall.toStdString().c_str(),mode.toStdString().c_str(),m_status,prio,ui->TxFreqSpinBox->value (),m_used_freq,m_callMode,m_callPrioCQ,m_reply_other,m_reply_me,counters2);
 
   if (rx > 0 && rx != ui->RxFreqSpinBox->value ()) ui->RxFreqSpinBox->setValue (rx);
   //if (tx > 0 && tx != ui->TxFreqSpinBox->value ()) ui->TxFreqSpinBox->setValue (tx);
@@ -3585,9 +3585,9 @@ void MainWindow::process_Auto()
        ui->dxGridEntry->setText(grid);
     }
     if (time < 86400 && m_status < QsoHistory::R73) {
-      m_dateTimeQSOOn = m_jtdxtime->currentDateTimeUtc2();
+      m_dateTimeQSOOn = m_atdxtime->currentDateTimeUtc2();
       m_dateTimeQSOOn.setTime(QTime::fromMSecsSinceStartOfDay(time*1000));
-      if (m_jtdxtime->currentDateTimeUtc2() < m_dateTimeQSOOn) m_dateTimeQSOOn = m_dateTimeQSOOn.addSecs(-86400);
+      if (m_atdxtime->currentDateTimeUtc2() < m_dateTimeQSOOn) m_dateTimeQSOOn = m_dateTimeQSOOn.addSecs(-86400);
     }
     if (!rpt.isEmpty () && rpt != m_rpt) {
       ui->rptSpinBox->setValue(rpt.toInt());
@@ -3635,12 +3635,12 @@ void MainWindow::process_Auto()
       case QsoHistory::RRR73: {
         if(!m_houndMode) { on_txb5_clicked(); if(ui->tabWidget->currentIndex()==1) ui->genMsg->setText(ui->tx5->currentText()); }
         else { 
-          auto curtime=m_jtdxtime->currentDateTimeUtc2();
+          auto curtime=m_atdxtime->currentDateTimeUtc2();
           if(m_lastloggedcall!=m_hisCall || qAbs(curtime.toMSecsSinceEpoch()-m_lastloggedtime.toMSecsSinceEpoch()) > int(m_TRperiod) * 7000) {
             m_logqso73=true;
             logQSOTimer.start (0);
           }
-          if(m_enableTx || m_transmitting || m_btxok || g_iptt==1) haltTx("end of DXpedition QSO ");
+          //if(m_enableTx || m_transmitting || m_btxok || g_iptt==1) haltTx("end of DXpedition QSO ");
         }
         break;
       }
@@ -3685,8 +3685,8 @@ void MainWindow::process_Auto()
 
 void MainWindow::readFromStdout()                             //readFromStdout
 {
-  while(proc_jtdxjt9.canReadLine()) {
-    QByteArray t=proc_jtdxjt9.readLine();
+  while(proc_atdxjt9.canReadLine()) {
+    QByteArray t=proc_atdxjt9.readLine();
     if(t.startsWith("<DecodeFinished>")) {
       dec_data.params.nstophint=1;
       m_bDecoded = t.mid (20).trimmed ().toInt () > 0;
@@ -3700,7 +3700,7 @@ void MainWindow::readFromStdout()                             //readFromStdout
       else if(m_modeTx == "T10") m_nguardfreq = 67;
       int indxncand=t.indexOf("<ncand>")+7; m_ncand=t.mid(indxncand,5).toInt();
       int indxdt=t.indexOf("<avexdt>")+8; QString avexdt = t.mid(indxdt,6).trimmed();
-//  printf("%s(%0.1f) Timing decode stop, %d candidates\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_jtdxtime->GetOffset(),m_ncand);
+//  printf("%s(%0.1f) Timing decode stop, %d candidates\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_atdxtime->GetOffset(),m_ncand);
       if (m_autoseq && !m_processAuto_done && !m_manualDecode) { m_processAuto_done = true; process_Auto(); }
       m_okToPost=true;
       m_RxLog=0;
@@ -3709,7 +3709,7 @@ void MainWindow::readFromStdout()                             //readFromStdout
       m_notified=false;
       if(m_config.write_decoded_debug()) writeToALLTXT("Decoding finished");
       QString slag="";
-      qint64 msDecFin=m_jtdxtime->currentMSecsSinceEpoch2();
+      qint64 msDecFin=m_atdxtime->currentMSecsSinceEpoch2();
       if(!m_manualDecode && !m_diskData) {
         qint64 periodms=m_TRperiod*1000;
         qint64 lagms=msDecFin - periodms*((m_msDecStarted / periodms)+1); // rounding to base int
@@ -3739,7 +3739,7 @@ void MainWindow::readFromStdout()                             //readFromStdout
           }
           else m_lostaudio=false;
           if (ui->syncButton->isChecked()) {
-            if (navexdt > 19) m_jtdxtime->SetOffset(m_jtdxtime->GetOffset() - avexdt.toFloat());
+            if (navexdt > 19) m_atdxtime->SetOffset(m_atdxtime->GetOffset() - avexdt.toFloat());
             ui->syncButton->setChecked(false);
           } else if (!ui->syncButton->isEnabled()) ui->syncButton->setEnabled(true);
         }
@@ -3759,11 +3759,11 @@ void MainWindow::readFromStdout()                             //readFromStdout
       return;
     } else {
       if(t.indexOf(m_baseCall.toLatin1()) >= 0 || m_config.write_decoded() || m_config.write_decoded_debug()) {
-        QFile f {m_dataDir.absoluteFilePath (m_jtdxtime->currentDateTimeUtc2().toString("yyyyMM_")+"ALL.TXT")};
+        QFile f {m_dataDir.absoluteFilePath (m_atdxtime->currentDateTimeUtc2().toString("yyyyMM_")+"ALL.TXT")};
         if (f.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append)) {
           QTextStream out(&f);
           if (m_RxLog==1) {
-            out << m_jtdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss")
+            out << m_atdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss")
                 << "  " << qSetRealNumberPrecision (12) << (m_freqNominal / 1.e6) << " MHz  "
                 << m_mode << 
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
@@ -3774,7 +3774,7 @@ void MainWindow::readFromStdout()                             //readFromStdout
 
             m_RxLog=0;
           }
-          out << m_jtdxtime->currentDateTimeUtc2().toString("yyyyMMdd_") << t.trimmed() << 
+          out << m_atdxtime->currentDateTimeUtc2().toString("yyyyMMdd_") << t.trimmed() << 
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
                  endl;
 #else
@@ -3783,7 +3783,7 @@ void MainWindow::readFromStdout()                             //readFromStdout
 
           f.close();
         } else {
-          JTDXMessageBox::warning_message (this, "", tr ("File Open Error")
+          atdxMessageBox::warning_message (this, "", tr ("File Open Error")
                                        , tr ("Cannot open \"%1\" for append: %2")
                                        .arg (f.fileName ()).arg (f.errorString ()));
         }
@@ -3792,18 +3792,18 @@ void MainWindow::readFromStdout()                             //readFromStdout
         if (m_config.insert_blank () && m_blankLine)
           {
             QString band;
-            if (m_jtdxtime->currentMSecsSinceEpoch2() / 1000 - m_secBandChanged > 50 
-			|| (m_jtdxtime->currentMSecsSinceEpoch2() / 1000 - m_secBandChanged > 14 && m_mode == "FT8")
-			|| (m_jtdxtime->currentMSecsSinceEpoch2() / 1000 - m_secBandChanged > 6 && m_mode == "FT4"))
+            if (m_atdxtime->currentMSecsSinceEpoch2() / 1000 - m_secBandChanged > 50 
+			|| (m_atdxtime->currentMSecsSinceEpoch2() / 1000 - m_secBandChanged > 14 && m_mode == "FT8")
+			|| (m_atdxtime->currentMSecsSinceEpoch2() / 1000 - m_secBandChanged > 6 && m_mode == "FT4"))
               {
                 band = ' ' + m_config.bands ()->find (m_freqNominal) + ' ';
               }
               
             QString blnklinetime;
             if (m_mode.startsWith("FT")) {
-				blnklinetime = m_jtdxtime->currentDateTimeUtc2().toString("dd.MM.yy hh:mm:ss' UTC ----'");
+				blnklinetime = m_atdxtime->currentDateTimeUtc2().toString("dd.MM.yy hh:mm:ss' UTC ----'");
             } else {
-				blnklinetime = m_jtdxtime->currentDateTimeUtc2().toString("dd.MM.yy hh:mm' UTC '");
+				blnklinetime = m_atdxtime->currentDateTimeUtc2().toString("dd.MM.yy hh:mm' UTC '");
             }
             if (!m_diskData) {
                     ui->decodedTextBrowser->insertLineSpacer ("----- " + blnklinetime + band.rightJustified (13, '-') + "----");
@@ -3974,7 +3974,7 @@ void MainWindow::readFromStdout()                             //readFromStdout
             // qDebug() << "To PSKreporter:" << deCall << grid << frequency << msgmode << snr;
             psk_Reporter->addRemoteStation(deCall,grid,QString::number(frequency),msgmode,
                                            QString::number(snr),
-                                           QString::number(m_jtdxtime->currentDateTime2().toTime_t()));
+                                           QString::number(m_atdxtime->currentDateTime2().toTime_t()));
           }
       }
     }
@@ -3993,7 +3993,7 @@ void MainWindow::killFile ()
     }
   }
   if(m_logInitNeeded) {
-    printf("%s(%0.1f) Timing Log_init_needed\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_jtdxtime->GetOffset());
+    printf("%s(%0.1f) Timing Log_init_needed\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_atdxtime->GetOffset());
     if(m_config.write_decoded_debug()) writeToALLTXT("Log initialization is started: wsjtx_log.adi file was changed");
     m_logBook.init(m_config.callNotif() ? m_config.my_callsign() : "",m_config.gridNotif() ? m_config.my_grid() : "",m_config.timeFrom());
     countQSOs ();
@@ -4007,29 +4007,29 @@ void MainWindow::set_language (QString const& lang)
     bool olek;
     QString tolge;
     QTranslator translator;
-    olek = translator.load (QLocale(lang),"jtdx","_",":/Translations");
-    if (!olek) olek = translator.load (QString {"jtdx_"} + lang);
-    JTDXMessageBox msgbox;
+    olek = translator.load (QLocale(lang),"atdx","_",":/Translations");
+    if (!olek) olek = translator.load (QString {"atdx_"} + lang);
+    atdxMessageBox msgbox;
     msgbox.setWindowTitle(tr("Confirm change Language"));
-    msgbox.setIcon(JTDXMessageBox::Question);
-    msgbox.setText(tr("Are You sure to change UI Language to English, JTDX will restart?"));
-    msgbox.setStandardButtons(JTDXMessageBox::Yes | JTDXMessageBox::No);
-    msgbox.setDefaultButton(JTDXMessageBox::No);
+    msgbox.setIcon(atdxMessageBox::Question);
+    msgbox.setText(tr("Are You sure to change UI Language to English, atdx will restart?"));
+    msgbox.setStandardButtons(atdxMessageBox::Yes | atdxMessageBox::No);
+    msgbox.setDefaultButton(atdxMessageBox::No);
     if (olek) {
       tolge = translator.translate("MainWindow","Confirm change Language");
       if (!tolge.isEmpty()) msgbox.setWindowTitle(tolge);
       else msgbox.setWindowTitle("Confirm change Language");
-      tolge = translator.translate("MainWindow","Are You sure to change UI Language to English, JTDX will restart?");
+      tolge = translator.translate("MainWindow","Are You sure to change UI Language to English, atdx will restart?");
       if (!tolge.isEmpty()) msgbox.setText(tolge);
-      else msgbox.setText("Are You sure to change UI Language to English, JTDX will restart?");
-      tolge = translator.translate("JTDXMessageBox","&Yes");
-      if (!tolge.isEmpty()) msgbox.button(JTDXMessageBox::Yes)->setText(tolge);
-      else msgbox.button(JTDXMessageBox::Yes)->setText("&Yes");
-      tolge = translator.translate("JTDXMessageBox","&No");
-      if (!tolge.isEmpty()) msgbox.button(JTDXMessageBox::No)->setText(tolge);
-      else msgbox.button(JTDXMessageBox::No)->setText("&No");
+      else msgbox.setText("Are You sure to change UI Language to English, atdx will restart?");
+      tolge = translator.translate("atdxMessageBox","&Yes");
+      if (!tolge.isEmpty()) msgbox.button(atdxMessageBox::Yes)->setText(tolge);
+      else msgbox.button(atdxMessageBox::Yes)->setText("&Yes");
+      tolge = translator.translate("atdxMessageBox","&No");
+      if (!tolge.isEmpty()) msgbox.button(atdxMessageBox::No)->setText(tolge);
+      else msgbox.button(atdxMessageBox::No)->setText("&No");
     }
-    if(msgbox.exec() == JTDXMessageBox::Yes) {
+    if(msgbox.exec() == atdxMessageBox::Yes) {
             m_lang = lang;
             m_exitCode = 1337;
             QMainWindow::close();
@@ -4058,7 +4058,7 @@ void MainWindow::set_language (QString const& lang)
 
 void MainWindow::on_EraseButton_clicked()                          //Erase
 {
-  qint64 ms=m_jtdxtime->currentMSecsSinceEpoch2();
+  qint64 ms=m_atdxtime->currentMSecsSinceEpoch2();
   ui->decodedTextBrowser->clear();
   if(m_mode.left(4)=="WSPR") {
     ui->decodedTextBrowser->clear();
@@ -4120,7 +4120,7 @@ void MainWindow::guiUpdate()
     tx2 += m_TRperiod;
   }
 
-  qint64 ms = m_jtdxtime->currentMSecsSinceEpoch2() % 86400000;
+  qint64 ms = m_atdxtime->currentMSecsSinceEpoch2() % 86400000;
   int nsec=ms/1000;
   double tsec=0.001*ms;
   double t2p=fmod(tsec,2.0*m_TRperiod);
@@ -4190,25 +4190,25 @@ void MainWindow::guiUpdate()
         onAirFreq0=onAirFreq;
         if (onAirFreq > f_from and onAirFreq < f_to) {
           auto const& message1 = tr ("Please choose another Tx frequency."
-                                  " JTDX will not knowingly transmit another"
+                                  " atdx will not knowingly transmit another"
                                   " mode in the WSPR sub-band.");
 #if QT_VERSION >= 0x050400
           QTimer::singleShot (0, [=] { // don't block guiUpdate
-            JTDXMessageBox::warning_message (this, "", tr ("WSPR Guard Band"), message1);
+            atdxMessageBox::warning_message (this, "", tr ("WSPR Guard Band"), message1);
           });
 #else
-          JTDXMessageBox::warning_message (this, "", tr ("WSPR Guard Band"), message1);
+          atdxMessageBox::warning_message (this, "", tr ("WSPR Guard Band"), message1);
 #endif
         } else {
           auto const& message1 = tr ("Please choose another Tx frequency."
-                                  " JTDX will not allow to Call below 1000 Hz"
+                                  " atdx will not allow to Call below 1000 Hz"
                                   " in DXped mode.");
 #if QT_VERSION >= 0x050400
           QTimer::singleShot (0, [=] { // don't block guiUpdate
-            JTDXMessageBox::warning_message (this, "", tr ("FT8 F/H Tx Guard"), message1);
+            atdxMessageBox::warning_message (this, "", tr ("FT8 F/H Tx Guard"), message1);
           });
 #else
-          JTDXMessageBox::warning_message (this, "", tr ("FT8 F/H Tx Guard"), message1);
+          atdxMessageBox::warning_message (this, "", tr ("FT8 F/H Tx Guard"), message1);
 #endif
         }
       }
@@ -4249,7 +4249,7 @@ void MainWindow::guiUpdate()
   // Calculate Tx tones when needed
   if((g_iptt==1 && iptt0==0) || m_restart) {
 //----------------------------------------------------------------------
-//    printf("%s(%0.1f) Timing transmission start %d %d\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_jtdxtime->GetOffset(),g_iptt,iptt0);
+//    printf("%s(%0.1f) Timing transmission start %d %d\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_atdxtime->GetOffset(),g_iptt,iptt0);
     QByteArray ba;
     QByteArray ba0;
 
@@ -4331,11 +4331,11 @@ void MainWindow::guiUpdate()
     last_tx_label->setText(tr("LastTx: ") + m_currentMessage.trimmed());
 	
     if(m_restart && !haltedEmpty) {
-      QFile f {m_dataDir.absoluteFilePath (m_jtdxtime->currentDateTimeUtc2().toString("yyyyMM_")+"ALL.TXT")};
+      QFile f {m_dataDir.absoluteFilePath (m_atdxtime->currentDateTimeUtc2().toString("yyyyMM_")+"ALL.TXT")};
       if (f.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append))
         {
           QTextStream out(&f);
-          out << m_jtdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz") << "(" << m_jtdxtime->GetOffset() << ")"
+          out << m_atdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz") << "(" << m_atdxtime->GetOffset() << ")"
               << "  Retransmitting " << qSetRealNumberPrecision (12) << (m_freqNominal / 1.e6)
               << " MHz +" << ui->TxFreqSpinBox->value () <<"Hz  " << m_modeTx
               << ":  " << m_currentMessage << 
@@ -4347,7 +4347,7 @@ void MainWindow::guiUpdate()
 
           if(m_config.write_decoded_debug()) {
             QString autoseqa=ui->AutoSeqButton->text(); int indx=autoseqa.length()-1; QString autoseq="AutoSeq"+autoseqa[indx];
-            out << m_jtdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz") << "(" << m_jtdxtime->GetOffset() << ")"
+            out << m_atdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz") << "(" << m_atdxtime->GetOffset() << ")"
                 << "  AF TX/RX " << ui->TxFreqSpinBox->value () << "/" << ui->RxFreqSpinBox->value ()
                 << "Hz " << autoseq << (m_autoseq ? "-On" : "-Off") << " AutoTx" 
                 << (m_autoTx ? "-On" : "-Off") << " SShotQSO" << (m_singleshot ? "-On" : "-Off")
@@ -4363,7 +4363,7 @@ void MainWindow::guiUpdate()
         }
       else
         {
-          JTDXMessageBox::warning_message (this, "", tr ("File Open Error")
+          atdxMessageBox::warning_message (this, "", tr ("File Open Error")
                                        , tr ("Cannot open \"%1\" for append: %2")
                                        .arg (f.fileName ()).arg (f.errorString ()));
         }
@@ -4397,7 +4397,7 @@ void MainWindow::guiUpdate()
     if (m_sentFirst73) {
       if (!m_mode.startsWith("FT") && m_config.id_after_73 ()) icw[0] = m_ncw;
       if ((m_config.prompt_to_log() || m_config.autolog ()) && !m_tune) {
-		auto curtime=m_jtdxtime->currentDateTimeUtc2();
+		auto curtime=m_atdxtime->currentDateTimeUtc2();
 		// 4*m_TRperiod guard against duplicate logging the same callsign
 		if (m_lastloggedcall!=m_hisCall || qAbs(curtime.toMSecsSinceEpoch()-m_lastloggedtime.toMSecsSinceEpoch()) > int(m_TRperiod) * 2000) {
 		  m_logqso73=true;
@@ -4468,13 +4468,13 @@ void MainWindow::guiUpdate()
     if (m_houndMode && (m_QSOProgress == REPLYING || m_ntx == 1)) m_lastCallingFreq = ui->TxFreqSpinBox->value ();
     if(m_curMsgTx!=m_msgSent0) m_msgSent0=m_curMsgTx;
     if(!m_tune && !haltedEmpty) {
-      QFile f {m_dataDir.absoluteFilePath (m_jtdxtime->currentDateTimeUtc2().toString("yyyyMM_")+"ALL.TXT")};
+      QFile f {m_dataDir.absoluteFilePath (m_atdxtime->currentDateTimeUtc2().toString("yyyyMM_")+"ALL.TXT")};
       if (f.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append)) {
         QTextStream out(&f);
         if(m_config.write_decoded_debug()) {
           QString autoseqa=ui->AutoSeqButton->text(); int indx=autoseqa.length()-1; QString autoseq="AutoSeq"+autoseqa[indx];
-          out << m_jtdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz") << "(" << m_jtdxtime->GetOffset() << ")"
-              << "  JTDX v" << QCoreApplication::applicationVersion () << revision () <<" Transmitting " << qSetRealNumberPrecision (12)
+          out << m_atdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz") << "(" << m_atdxtime->GetOffset() << ")"
+              << "  atdx v" << QCoreApplication::applicationVersion () << revision () <<" Transmitting " << qSetRealNumberPrecision (12)
               << (m_freqNominal / 1.e6) << " MHz + " << ui->TxFreqSpinBox->value () <<"Hz  " << m_modeTx << ":  " << m_currentMessage <<
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
                  endl
@@ -4500,7 +4500,7 @@ void MainWindow::guiUpdate()
 #endif
  }
         else {
-          out << m_jtdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz") << "(" << m_jtdxtime->GetOffset() << ")"
+          out << m_atdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz") << "(" << m_atdxtime->GetOffset() << ")"
               << "  Transmitting " << qSetRealNumberPrecision (12)
               << (m_freqNominal / 1.e6) << " MHz + " << ui->TxFreqSpinBox->value () <<"Hz  " << m_modeTx << ":  " << m_currentMessage <<
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
@@ -4511,7 +4511,7 @@ void MainWindow::guiUpdate()
  }
         f.close();
       } else {
-        JTDXMessageBox::warning_message (this, "", tr ("File Open Error")
+        atdxMessageBox::warning_message (this, "", tr ("File Open Error")
                                      , tr ("Cannot open \"%1\" for append: %2")
                                      .arg (f.fileName ()).arg (f.errorString ()));
       }
@@ -4595,8 +4595,8 @@ void MainWindow::guiUpdate()
       tx_status_label->setText("");
       progressBar->setStyleSheet(cssSafe);
     }
-    if(m_transmitting && !m_tune && (m_nseq==10 || m_nseq==11)) { m_lapmyc=1; m_mslastTX = m_jtdxtime->currentMSecsSinceEpoch2(); } //setting twice: make sure it is not skipped
-    QDateTime tme = m_jtdxtime->currentDateTimeUtc2();
+    if(m_transmitting && !m_tune && (m_nseq==10 || m_nseq==11)) { m_lapmyc=1; m_mslastTX = m_atdxtime->currentMSecsSinceEpoch2(); } //setting twice: make sure it is not skipped
+    QDateTime tme = m_atdxtime->currentDateTimeUtc2();
     QString currentDate = tme.date().toString("dd.MM.yyyy");
     QString utc = tme.time().toString();
     QString hour = tme.time().toString("hh");
@@ -4635,11 +4635,11 @@ void MainWindow::guiUpdate()
     if(!m_monitoring and !m_diskData) ui->signal_meter_widget->setValue(0);
     displayDialFrequency ();
     if (m_geometry_restored > 0) { m_geometry_restored -=1; if (m_geometry_restored == 0) restoreGeometry (m_geometry);}
-//workaround to recover decoding in case if .lock deletion event is not received by proc_jtdxjt9, Decode button hung up issue
+//workaround to recover decoding in case if .lock deletion event is not received by proc_atdxjt9, Decode button hung up issue
 /*    quint64 timeout=76000; 
     if(m_mode=="FT4") timeout=10000;
     else if(m_mode=="FT8") timeout=18000;
-    if(m_decoderBusy && !m_mode.startsWith("WSPR") && (m_jtdxtime->currentMSecsSinceEpoch2()-m_msDecoderStarted)>timeout) {
+    if(m_decoderBusy && !m_mode.startsWith("WSPR") && (m_atdxtime->currentMSecsSinceEpoch2()-m_msDecoderStarted)>timeout) {
       m_manualDecode=false; ui->DecodeButton->setChecked (false);
       QFile {m_config.temp_dir ().absoluteFilePath (".lock")}.open(QIODevice::ReadWrite);
       decodeBusy(false);
@@ -4704,7 +4704,7 @@ void MainWindow::startTx2()
 //  for(int i=0; i<15; i++) { // workaround to modulator start failure
 //    if(i==1) QThread::currentThread()->msleep(5);
 //    else if(i>1) QThread::currentThread()->msleep(10);
-//    printf("%s(%0.1f) Timing modulator",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_jtdxtime->GetOffset());
+//    printf("%s(%0.1f) Timing modulator",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_atdxtime->GetOffset());
     bool modulator_active;
     bool tci_active = m_tci;
     if (tci_active) modulator_active=m_tci_mod_active;
@@ -4720,7 +4720,7 @@ void MainWindow::startTx2()
       if(t.left(1)=="#") snr=t.mid(1,5).toDouble();
       if(snr>0.0 or snr < -50.0) snr=99.0;
       transmit (snr);
-//      printf(" started %s\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str());
+//      printf(" started %s\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str());
       if(m_config.write_decoded_debug()) writeToALLTXT("Modulator started");
 //      QThread::currentThread()->setPriority(QThread::HighPriority);
       ui->signal_meter_widget->setValue(0);
@@ -4735,7 +4735,7 @@ void MainWindow::startTx2()
         QFile f {m_dataDir.absoluteFilePath ("ALL_WSPR.TXT")};
         if (f.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append)) {
           QTextStream out(&f);
-          out << m_jtdxtime->currentDateTimeUtc2().toString("yyMMdd hhmm")
+          out << m_atdxtime->currentDateTimeUtc2().toString("yyMMdd hhmm")
               << "  Transmitting " << qSetRealNumberPrecision (12) << (m_freqNominal / 1.e6) << " MHz:  "
               << m_currentMessage << "  " + m_mode <<
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
@@ -4746,7 +4746,7 @@ void MainWindow::startTx2()
 
           f.close();
         } else {
-          JTDXMessageBox::warning_message (this, "", tr ("File Open Error")
+          atdxMessageBox::warning_message (this, "", tr ("File Open Error")
                                        , tr ("Cannot open \"%1\" for append: %2")
                                        .arg (f.fileName ()).arg (f.errorString ()));
         }
@@ -4772,7 +4772,7 @@ void MainWindow::stopTx()
     ptt0Timer.start(200);                //Sequencer delay
     if(!m_monitoroff) monitor (true);
     statusUpdate ();
-    m_secTxStopped=m_jtdxtime->currentMSecsSinceEpoch2()/1000;
+    m_secTxStopped=m_atdxtime->currentMSecsSinceEpoch2()/1000;
   }
 }
 
@@ -4782,7 +4782,7 @@ void MainWindow::stopTx2()
   if (m_tci) {
     if(!m_monitoroff) monitor (true);
     statusUpdate ();
-    m_secTxStopped=m_jtdxtime->currentMSecsSinceEpoch2()/1000;
+    m_secTxStopped=m_atdxtime->currentMSecsSinceEpoch2()/1000;
   }
 //  QThread::currentThread()->setPriority(QThread::HighPriority);
   if(m_mode.left(4)=="WSPR" and m_ntr==-1 and !m_tuneup) {
@@ -5661,7 +5661,7 @@ void MainWindow::on_lookupButton_clicked() { lookup(); }
 void MainWindow::on_addButton_clicked()
 {
   if(m_hisGrid.isEmpty()) {
-    JTDXMessageBox::warning_message (this, "", tr ("Add to CALL3.TXT")
+    atdxMessageBox::warning_message (this, "", tr ("Add to CALL3.TXT")
                                  , tr ("Please enter a valid grid locator"));
     return;
   }
@@ -5673,7 +5673,7 @@ void MainWindow::on_addButton_clicked()
   
   QFile f1 {m_dataDir.absoluteFilePath ("CALL3.TXT")};
   if(!f1.open(QIODevice::ReadWrite | QIODevice::Text)) {
-    JTDXMessageBox::warning_message (this, "", tr ("Add to CALL3.TXT")
+    atdxMessageBox::warning_message (this, "", tr ("Add to CALL3.TXT")
                                  , tr ("Cannot open \"%1\" for read/write: %2")
                                  .arg (f1.fileName ()).arg (f1.errorString ()));
     return;
@@ -5692,7 +5692,7 @@ void MainWindow::on_addButton_clicked()
   }
   QFile f2 {m_dataDir.absoluteFilePath ("CALL3.TMP")};
   if(!f2.open(QIODevice::WriteOnly | QIODevice::Text)) {
-    JTDXMessageBox::warning_message (this, "", tr ("Add to CALL3.TXT")
+    atdxMessageBox::warning_message (this, "", tr ("Add to CALL3.TXT")
                                  , tr ("Cannot open \"%1\" for writing: %2")
                                  .arg (f2.fileName ()).arg (f2.errorString ()));
     return;
@@ -5718,8 +5718,8 @@ void MainWindow::on_addButton_clicked()
       } else if(hc==hc2) {
         QString t {tr ("%1\nis already in CALL3.TXT"
                        ", do you wish to replace it?").arg (s)};
-        int ret = JTDXMessageBox::query_message (this, "", tr ("Add to CALL3.TXT"), t);
-        if(ret==JTDXMessageBox::Yes) {
+        int ret = atdxMessageBox::query_message (this, "", tr ("Add to CALL3.TXT"), t);
+        if(ret==atdxMessageBox::Yes) {
           out << newEntry + QChar::LineFeed;
           m_call3Modified=true;
         }
@@ -5989,7 +5989,7 @@ void MainWindow::on_dxGridEntry_textChanged(const QString &t) //dxGrid changed
   if (t != m_hisGrid) { ui->dxGridEntry->setText(m_hisGrid); ui->dxGridEntry->setCursorPosition (pos); }
   else {
         statusUpdate ();
-        qint64 nsec = m_jtdxtime->currentMSecsSinceEpoch2() % 86400;
+        qint64 nsec = m_atdxtime->currentMSecsSinceEpoch2() % 86400;
         double utch=nsec/3600.0;
         int nAz=0,nEl=0,nDmiles=0,nDkm=0,nHotAz,nHotABetter;
         if (!m_hisGrid.isEmpty() && !m_config.my_grid ().isEmpty())
@@ -6011,7 +6011,7 @@ void MainWindow::on_genStdMsgsPushButton_clicked() { genStdMsgs(m_rpt); }
 void MainWindow::on_logQSOButton_clicked()
 {
   if (m_hisCall.isEmpty()) return;
-  auto currenttime = m_jtdxtime->currentDateTimeUtc2();
+  auto currenttime = m_atdxtime->currentDateTimeUtc2();
   auto dateTimeQSOOff = currenttime;
   QString rrep,srep,distance;
   unsigned time = 0;
@@ -6059,13 +6059,13 @@ void MainWindow::acceptQSO2(QDateTime const& QSO_date_off, QString const& call, 
   if(m_config.enable_udp2_broadcast() && m_config.valid_udp2()) {
     QUdpSocket sock;
     if(-1 == sock.writeDatagram (myadif2, QHostAddress {m_config.udp2_server_name()}, m_config.udp2_server_port()))
-      { JTDXMessageBox::warning_message (this, "", tr ("Error sending QSO ADIF data to secondary UDP server"), tr ("Write returned \"%1\"").arg (sock.errorString ())); }
+      { atdxMessageBox::warning_message (this, "", tr ("Error sending QSO ADIF data to secondary UDP server"), tr ("Write returned \"%1\"").arg (sock.errorString ())); }
   }
   if (m_config.send_to_eqsl())
       Eqsl->upload(m_config.eqsl_username(),m_config.eqsl_passwd(),m_config.eqsl_nickname(),call,mode,QSO_date_on,rpt_sent,m_config.bands ()->find (dial_freq),eqslcomments);
   ui->dxCallEntry->setStyleSheet(QString("QLineEdit {color: %1; background: %2}").arg(Radio::convert_dark("#000000",m_useDarkStyle),Radio::convert_dark("#7fff7f",m_useDarkStyle)));
   m_lastloggedcall=call;
-  m_lastloggedtime=m_jtdxtime->currentDateTimeUtc2();
+  m_lastloggedtime=m_atdxtime->currentDateTimeUtc2();
   if (m_config.clear_DX () && !logClearDXTimer.isActive() && !m_autoTx && !m_autoseq) logClearDXTimer.start ((qAbs(int(m_TRperiod)-m_nseq))*1000);
   countQSOs ();
   writeToALLTXT("QSO logged: " + m_lastloggedcall);
@@ -6424,11 +6424,11 @@ void MainWindow::on_actionSwitch_Filter_OFF_at_getting_73_triggered(bool checked
 
 void MainWindow::on_actionErase_ALL_TXT_triggered()          //Erase ALL.TXT
 {
-  int ret = JTDXMessageBox::warning_message(this, "", tr("Confirm Erase"),
+  int ret = atdxMessageBox::warning_message(this, "", tr("Confirm Erase"),
                                  tr("Are you sure you want to erase file ALL.TXT ?"),
-                                 "", JTDXMessageBox::Yes | JTDXMessageBox::No, JTDXMessageBox::Yes);
-  if(ret==JTDXMessageBox::Yes) {
-    QFile f {m_dataDir.absoluteFilePath (m_jtdxtime->currentDateTimeUtc2().toString("yyyyMM_")+"ALL.TXT")};
+                                 "", atdxMessageBox::Yes | atdxMessageBox::No, atdxMessageBox::Yes);
+  if(ret==atdxMessageBox::Yes) {
+    QFile f {m_dataDir.absoluteFilePath (m_atdxtime->currentDateTimeUtc2().toString("yyyyMM_")+"ALL.TXT")};
     f.remove();
     m_RxLog=1;
   }
@@ -6436,10 +6436,10 @@ void MainWindow::on_actionErase_ALL_TXT_triggered()          //Erase ALL.TXT
 
 void MainWindow::on_actionErase_wsjtx_log_adi_triggered()
 {
-  int ret = JTDXMessageBox::warning_message(this, "", tr("Confirm Erase"),
+  int ret = atdxMessageBox::warning_message(this, "", tr("Confirm Erase"),
                                  tr("Are you sure you want to erase your QSO LOG?"),
-                                 "", JTDXMessageBox::Yes | JTDXMessageBox::No, JTDXMessageBox::Yes);
-  if(ret==JTDXMessageBox::Yes) {
+                                 "", atdxMessageBox::Yes | atdxMessageBox::No, atdxMessageBox::Yes);
+  if(ret==atdxMessageBox::Yes) {
     QFile f {m_dataDir.absoluteFilePath ("wsjtx_log.adi")};
     f.remove();
   }
@@ -6571,7 +6571,7 @@ void MainWindow::band_changed (Frequency f)
     m_nsecBandChanged=0;
     if(!m_transmitting && (oldband != newband || m_oldmode != m_mode) && m_rigOk && !m_config.rig_name().startsWith("None")) {
       m_bandChanged=true;
-      qint64 ms = m_jtdxtime->currentMSecsSinceEpoch2() % 86400000; int nsec=ms/1000;
+      qint64 ms = m_atdxtime->currentMSecsSinceEpoch2() % 86400000; int nsec=ms/1000;
       double TRperiod=60.0; // TR period is the only reliable way in this point of code at the mode change 
       if(m_mode=="FT8") TRperiod=15.0;
       else if(m_mode=="FT4") TRperiod=7.5;
@@ -6622,7 +6622,7 @@ void MainWindow::band_changed (Frequency f)
           message =  tr ("Hound mode TX frequency control requires"
                                                               " *Split* rig control (either *Rig* or *Fake It* set"
                                                               " in the *Settings | Radio* tab.)");
-          JTDXMessageBox::warning_message (this, "", tr ("Hound TX frequency control warning"), message);
+          atdxMessageBox::warning_message (this, "", tr ("Hound TX frequency control warning"), message);
           ui->actionEnable_hound_mode->setChecked(false);
         } else {
           m_houndTXfreqJumps=!m_commonFT8b && m_config.split_mode() && m_config.rig_name() != "None";
@@ -6718,13 +6718,13 @@ void MainWindow::mousePressEvent(QMouseEvent *event)             //mousePressEve
     }   
   }
   
-  if(ui->syncButton->hasFocus() && (event->button() & Qt::RightButton) && m_jtdxtime->GetOffset() != 0.0) {
-    m_jtdxtime->SetOffset(0);
+  if(ui->syncButton->hasFocus() && (event->button() & Qt::RightButton) && m_atdxtime->GetOffset() != 0.0) {
+    m_atdxtime->SetOffset(0);
     ui->syncButton->setEnabled(false);
   }
 
   if(ui->EraseButton->hasFocus() && (event->button() & Qt::RightButton)) {
-    qint64 ms=m_jtdxtime->currentMSecsSinceEpoch2();
+    qint64 ms=m_atdxtime->currentMSecsSinceEpoch2();
     ui->decodedTextBrowser2->clear();
     if(m_mode.left(4)=="WSPR") { ui->decodedTextBrowser->clear(); }
     else {
@@ -7108,8 +7108,8 @@ void MainWindow::handle_transceiver_update (Transceiver::TransceiverState const&
     writeToALLTXT("handle_transceiver_update started, current rig state: " + curPttState + 
       ", requested state: " + reqPttState + ", m_tx_when_ready: " + tx_when_ready + ", g_iptt=" + QString::number(g_iptt));
    }
-//   printf("%s(%0.1f) tranceiver update %d %d old %d new %d\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),
-//     m_jtdxtime->GetOffset(),m_tx_when_ready,g_iptt,m_rigState.ptt (),s.ptt ());
+//   printf("%s(%0.1f) tranceiver update %d %d old %d new %d\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),
+//     m_atdxtime->GetOffset(),m_tx_when_ready,g_iptt,m_rigState.ptt (),s.ptt ());
   if (!s.ptt() && m_rigState.ptt () && (m_transmitting || m_tune)) haltTx("Halt Tx from rig detected ");
   if (s.ptt () && !m_rigState.ptt ()) // safe to start audio
                                       // (caveat - DX Lab Suite Commander)
@@ -7163,15 +7163,15 @@ void MainWindow::handle_transceiver_update (Transceiver::TransceiverState const&
           if (m_lastDialFreq != m_freqNominal)
             {
               m_lastDialFreq = m_freqNominal;
-              m_secBandChanged=m_jtdxtime->currentMSecsSinceEpoch2()/1000;
+              m_secBandChanged=m_atdxtime->currentMSecsSinceEpoch2()/1000;
 //              if((s.frequency () < 30000000u || (s.frequency () > 30000000u && !m_config.tx_QSY_allowed ()))  && m_mode.left(4)!="WSPR") {
                 // Write freq changes to ALL.TXT.
-                QFile f2 {m_dataDir.absoluteFilePath (m_jtdxtime->currentDateTimeUtc2().toString("yyyyMM_")+"ALL.TXT")};
+                QFile f2 {m_dataDir.absoluteFilePath (m_atdxtime->currentDateTimeUtc2().toString("yyyyMM_")+"ALL.TXT")};
                 if (f2.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append)) {
                   QTextStream out(&f2);
-                  out << m_jtdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss")
+                  out << m_atdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss")
                       << "  " << qSetRealNumberPrecision (12) << (m_freqNominal / 1.e6) << " MHz  "
-                      << m_mode << " JTDX v" << QCoreApplication::applicationVersion () << revision () <<
+                      << m_mode << " atdx v" << QCoreApplication::applicationVersion () << revision () <<
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
                  endl;
 #else
@@ -7180,7 +7180,7 @@ void MainWindow::handle_transceiver_update (Transceiver::TransceiverState const&
 
                   f2.close();
                 } else {
-                  JTDXMessageBox::warning_message (this, "", tr ("File Open Error")
+                  atdxMessageBox::warning_message (this, "", tr ("File Open Error")
                                                , tr ("Cannot open \"%1\" for append: %2")
                                                .arg (f2.fileName ()).arg (f2.errorString ()));
                 }
@@ -7236,15 +7236,15 @@ void MainWindow::rigFailure (QString const& reason, QString const& detail)
       // don't call slot functions directly to avoid recursion
       switch (m_rigErrorMessageBox.exec ())
         {
-        case JTDXMessageBox::Ok:
+        case atdxMessageBox::Ok:
           QTimer::singleShot (0, this, SLOT (on_actionSettings_triggered ()));
           break;
 
-        case JTDXMessageBox::Retry:
+        case atdxMessageBox::Retry:
           QTimer::singleShot (0, this, SLOT (rigOpen ()));
           break;
 
-        case JTDXMessageBox::Cancel:
+        case atdxMessageBox::Cancel:
           QTimer::singleShot (0, this, SLOT (close ()));
           break;
         }
@@ -7402,10 +7402,10 @@ void MainWindow::setLastLogdLabel()
 
 void MainWindow::writeToALLTXT(QString const& text)
 {
-  QFile f {m_dataDir.absoluteFilePath (m_jtdxtime->currentDateTimeUtc2().toString("yyyyMM_")+"ALL.TXT")};
+  QFile f {m_dataDir.absoluteFilePath (m_atdxtime->currentDateTimeUtc2().toString("yyyyMM_")+"ALL.TXT")};
   if (f.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append)) {
      QTextStream out(&f);
-     out << m_jtdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz")  << "(" << m_jtdxtime->GetOffset() << ")" << "  " << text <<
+     out << m_atdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz")  << "(" << m_atdxtime->GetOffset() << ")" << "  " << text <<
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
                  endl;
 #else
@@ -7426,7 +7426,7 @@ void MainWindow::writeToALLTXT(QString const& text)
 
      f.close();
   } else {
-     JTDXMessageBox::warning_message (this, "", tr ("File Open Error")
+     atdxMessageBox::warning_message (this, "", tr ("File Open Error")
                                   , tr ("Cannot open \"%1\" for append: %2")
                                   .arg (f.fileName ()).arg (f.errorString ()));
   }
@@ -7476,7 +7476,7 @@ void MainWindow::pskSetLocal ()
   QString antenna_description;
   if (!matches.isEmpty ()) antenna_description = stations->index (matches.first ().row (), StationList::description_column).data ().toString ();
   // qDebug() << "To PSKreporter: local station details";
-  psk_Reporter->setLocalStation(m_config.my_callsign (), m_config.my_grid (), antenna_description, QString {"JTDX v" + version() + (m_tci ? " tci " : " ") + revision()}.simplified ());
+  psk_Reporter->setLocalStation(m_config.my_callsign (), m_config.my_grid (), antenna_description, QString {"atdx v" + version() + (m_tci ? " tci " : " ") + revision()}.simplified ());
 }
 
 void MainWindow::transmitDisplay (bool transmitting)
@@ -7641,12 +7641,12 @@ void MainWindow::postWSPRDecode (bool is_new, QStringList parts)
 
 void MainWindow::networkError (QString const& e)
 {
-  if (JTDXMessageBox::Retry == JTDXMessageBox::warning_message (this, "", tr ("Network Error")
+  if (atdxMessageBox::Retry == atdxMessageBox::warning_message (this, "", tr ("Network Error")
                                                   , tr ("Error: %1\nUDP server %2:%3")
                                                   .arg (e)
                                                   .arg (m_config.udp_server_name ())
                                                   .arg (m_config.udp_server_port ())
-                                                  , "", JTDXMessageBox::Cancel | JTDXMessageBox::Retry, JTDXMessageBox::Cancel))
+                                                  , "", atdxMessageBox::Cancel | atdxMessageBox::Retry, atdxMessageBox::Cancel))
     {
       // retry server lookup
       m_messageClient->set_server (m_config.udp_server_name ());
@@ -7756,7 +7756,7 @@ void MainWindow::p1ReadFromStdout()                        //p1readFromStdout
 
 QString MainWindow::WSPR_hhmm(int n)
 {
-  QDateTime t=m_jtdxtime->currentDateTimeUtc2().addSecs(n);
+  QDateTime t=m_atdxtime->currentDateTimeUtc2().addSecs(n);
   int m=t.toString("hhmm").toInt()/2;
   QString t1;
   t1 = QString::asprintf("%04d",2*m);
@@ -7765,7 +7765,7 @@ QString MainWindow::WSPR_hhmm(int n)
 
 void MainWindow::WSPR_history(Frequency dialFreq, int ndecodes)
 {
-  QDateTime t=m_jtdxtime->currentDateTimeUtc2().addSecs(-60);
+  QDateTime t=m_atdxtime->currentDateTimeUtc2().addSecs(-60);
   QString t1=t.toString("yyMMdd");
   QString t2=WSPR_hhmm(-60);
   QString t3;
@@ -7789,7 +7789,7 @@ void MainWindow::WSPR_history(Frequency dialFreq, int ndecodes)
 
     f.close();
   } else {
-    JTDXMessageBox::warning_message (this, "", tr ("File Error")
+    atdxMessageBox::warning_message (this, "", tr ("File Error")
                                  , tr ("Cannot open \"%1\" for append: %2")
                                  .arg (f.fileName ()).arg (f.errorString ()));
   }
@@ -7908,12 +7908,12 @@ void MainWindow::on_the_minute ()
 {
   if(minuteTimer.isSingleShot ()) { minuteTimer.setSingleShot (false); minuteTimer.start (60 * 1000); } // run free
   else {
-    auto const& ms_error = ms_minute_error (m_jtdxtime);
+    auto const& ms_error = ms_minute_error (m_atdxtime);
     // keep drift within +-1s
     if (qAbs (ms_error) > 1000) { minuteTimer.setSingleShot (true); minuteTimer.start (ms_error + 60 * 1000); }
     }
   if(m_config.watchdog () && !m_mode.startsWith ("WSPR")) {
-    qint64 deltasec=(m_jtdxtime->currentMSecsSinceEpoch2()/1000) - m_secTxStopped;
+    qint64 deltasec=(m_atdxtime->currentMSecsSinceEpoch2()/1000) - m_secTxStopped;
     bool update=true;
     if(!m_txwatchdog) {
        if(m_modeTx=="FT8") { if(deltasec > 32) update=false; }
@@ -7924,7 +7924,7 @@ void MainWindow::on_the_minute ()
   }
   else { txwatchdog (false); }
   //3...4 minutes to stop AP decoding
-  if(!m_transmitting && m_mode=="FT8" && (m_jtdxtime->currentMSecsSinceEpoch2()-m_mslastTX) > 120000) m_lapmyc=0;
+  if(!m_transmitting && m_mode=="FT8" && (m_atdxtime->currentMSecsSinceEpoch2()-m_mslastTX) > 120000) m_lapmyc=0;
 }
 
 void MainWindow::toggle_skipTx1 ()

@@ -24,10 +24,10 @@ PollingTransceiver::PollingTransceiver (int poll_interval, QObject * parent)
   , ft4_mode_ {false}
   , fast_mode_ {interval_ == 500}
   , retries_ {0}
-  , debug_file_ {QDir(QStandardPaths::writableLocation (QStandardPaths::DataLocation)).absoluteFilePath ("jtdx_debug.txt").toStdString()}
-  , m_jtdxtime {nullptr}
+  , debug_file_ {QDir(QStandardPaths::writableLocation (QStandardPaths::DataLocation)).absoluteFilePath ("atdx_debug.txt").toStdString()}
+  , m_atdxtime {nullptr}
 {
-#if JTDX_DEBUG_TO_FILE
+#if atdx_DEBUG_TO_FILE
 FILE * pFile = fopen (debug_file_.c_str(),"a");
 fprintf (pFile,"Polling Tranceiver created interval %d\n",poll_interval & 0x7fff);
 fclose (pFile);
@@ -47,19 +47,19 @@ void PollingTransceiver::start_timer ()
           connect (poll_timer_, &QTimer::timeout, this,
                    &PollingTransceiver::handle_timeout);
         }
-#if JTDX_DEBUG_TO_FILE
+#if atdx_DEBUG_TO_FILE
       FILE * pFile = fopen (debug_file_.c_str(),"a");
-      if (m_jtdxtime == nullptr)
+      if (m_atdxtime == nullptr)
         fprintf(pFile,"             Poll timer start interval=%d\n",interval_);
       else
-        fprintf(pFile,"%s Poll timer start interval=%d\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),interval_);
+        fprintf(pFile,"%s Poll timer start interval=%d\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),interval_);
 #endif
       poll_timer_->start (interval_);
-#if JTDX_DEBUG_TO_FILE
-      if (m_jtdxtime == nullptr)
+#if atdx_DEBUG_TO_FILE
+      if (m_atdxtime == nullptr)
         fprintf(pFile,"             Poll timer started\n");
       else
-        fprintf(pFile,"%s Poll timer started\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str());
+        fprintf(pFile,"%s Poll timer started\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str());
       fclose (pFile);
 #endif
     }
@@ -77,17 +77,17 @@ void PollingTransceiver::stop_timer ()
     }
 }
 
-void PollingTransceiver::do_post_start (JTDXDateTime * jtdxtime)
+void PollingTransceiver::do_post_start (atdxDateTime * atdxtime)
 {
-  m_jtdxtime = jtdxtime;
-  auto ms = m_jtdxtime->currentMSecsSinceEpoch2() % 1000;
-  int sec = m_jtdxtime->currentDateTimeUtc2().toString("ss").toInt() % 15;
-#if JTDX_DEBUG_TO_FILE
+  m_atdxtime = atdxtime;
+  auto ms = m_atdxtime->currentMSecsSinceEpoch2() % 1000;
+  int sec = m_atdxtime->currentDateTimeUtc2().toString("ss").toInt() % 15;
+#if atdx_DEBUG_TO_FILE
   FILE * pFile = fopen (debug_file_.c_str(),"a");
-  if (m_jtdxtime == nullptr)
+  if (m_atdxtime == nullptr)
     fprintf (pFile,"             Poll start ms %lld %d\n",ms,sec);
   else
-    fprintf (pFile,"%s Poll start ms %lld %d\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),ms,sec);
+    fprintf (pFile,"%s Poll start ms %lld %d\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),ms,sec);
   fclose (pFile);
 #endif
   if (ft4_mode_ && (sec == 7 || sec == 8 || sec == 9 || sec == 10 || sec == 11 || sec == 12 || sec == 13)) {
@@ -111,12 +111,12 @@ void PollingTransceiver::do_post_stop ()
 {
   // not much point waiting for rig to go offline since we are ceasing
   // polls
-#if JTDX_DEBUG_TO_FILE
+#if atdx_DEBUG_TO_FILE
   FILE * pFile = fopen (debug_file_.c_str(),"a");
-  if (m_jtdxtime == nullptr)
+  if (m_atdxtime == nullptr)
     fprintf (pFile,"             Poll stop\n");
   else
-    fprintf (pFile,"%s Poll stop\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str());
+    fprintf (pFile,"%s Poll stop\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str());
   fclose (pFile);
 #endif
   stop_timer ();
@@ -168,7 +168,7 @@ void PollingTransceiver::do_post_ft4_mode (bool p)
       // update polling style
       next_state_.ft4_mode (p);
       ft4_mode_ = p && (interval_ == 1000 || fast_mode_);
-      if (interval_ == 1000 && !fast_mode_ && m_jtdxtime != nullptr) do_post_start (m_jtdxtime);
+      if (interval_ == 1000 && !fast_mode_ && m_atdxtime != nullptr) do_post_start (m_atdxtime);
 }
 
 void PollingTransceiver::do_post_ptt (bool p)
@@ -199,8 +199,8 @@ void PollingTransceiver::handle_timeout ()
 
   // we must catch all exceptions here since we are called by Qt and
   // inform our parent of the failure via the offline() message
-  if (m_jtdxtime == nullptr) {
-#if JTDX_DEBUG_TO_FILE
+  if (m_atdxtime == nullptr) {
+#if atdx_DEBUG_TO_FILE
   FILE * pFile = fopen (debug_file_.c_str(),"a");
   fprintf(pFile,"             Poll start interval= %d retries=%d fast_mode=%d ft4_mode=%d\n",interval_,retries_,fast_mode_,ft4_mode_);
   fclose (pFile);
@@ -209,12 +209,12 @@ void PollingTransceiver::handle_timeout ()
   } else {
     try
       {
-        int sec = m_jtdxtime->currentDateTimeUtc2().toString("ss").toInt() % 15;
-        auto ms = m_jtdxtime->currentMSecsSinceEpoch2() % 1000;
-//        printf("%s %d Poll start interval=%d retries=%d fast_mode=%d ft4_mode=%d sec=%d ms=%lld\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),sec,interval_,retries_,fast_mode_,ft4_mode_,sec,ms);
-#if JTDX_DEBUG_TO_FILE
+        int sec = m_atdxtime->currentDateTimeUtc2().toString("ss").toInt() % 15;
+        auto ms = m_atdxtime->currentMSecsSinceEpoch2() % 1000;
+//        printf("%s %d Poll start interval=%d retries=%d fast_mode=%d ft4_mode=%d sec=%d ms=%lld\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),sec,interval_,retries_,fast_mode_,ft4_mode_,sec,ms);
+#if atdx_DEBUG_TO_FILE
         FILE * pFile = fopen (debug_file_.c_str(),"a");
-        fprintf(pFile,"%s %d Poll start interval=%d retries=%d fast_mode=%d ft4_mode=%d sec=%d ms=%lld\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),sec,interval_,retries_,fast_mode_,ft4_mode_,sec,ms);
+        fprintf(pFile,"%s %d Poll start interval=%d retries=%d fast_mode=%d ft4_mode=%d sec=%d ms=%lld\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),sec,interval_,retries_,fast_mode_,ft4_mode_,sec,ms);
         fclose (pFile);
 #endif
         if (!ft4_mode_ && !fast_mode_) {
@@ -236,12 +236,12 @@ void PollingTransceiver::handle_timeout ()
 //          printf("New interval %d ",interval_);
         }
         
-//        printf("%s %d Poll start retries=%d fast_mode=%d ft4_mode=%d sec=%d ms=%lld\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),sec,retries_,fast_mode_,ft4_mode_,sec,ms);
+//        printf("%s %d Poll start retries=%d fast_mode=%d ft4_mode=%d sec=%d ms=%lld\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),sec,retries_,fast_mode_,ft4_mode_,sec,ms);
         do_poll ();              // tell sub-classes to update our state
-//        printf("%s %d Poll end ",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),sec);
-#if JTDX_DEBUG_TO_FILE
+//        printf("%s %d Poll end ",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),sec);
+#if atdx_DEBUG_TO_FILE
         pFile = fopen (debug_file_.c_str(),"a");
-        fprintf(pFile,"%s %d Poll end ",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),sec);
+        fprintf(pFile,"%s %d Poll end ",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),sec);
         fclose (pFile);
 #endif
         // Signal new state if it what we expected or, hasn't become
@@ -271,17 +271,17 @@ void PollingTransceiver::handle_timeout ()
             retries_ = 0;
             next_state_ = state ();
             last_signalled_state_ = state ();
-#if JTDX_DEBUG_TO_FILE
+#if atdx_DEBUG_TO_FILE
             pFile = fopen (debug_file_.c_str(),"a");
-            fprintf(pFile,"%s signal\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str());
+            fprintf(pFile,"%s signal\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str());
             fclose (pFile);
 #endif
             update_complete (true);
           }
         else {
-#if JTDX_DEBUG_TO_FILE
+#if atdx_DEBUG_TO_FILE
           pFile = fopen (debug_file_.c_str(),"a");
-          fprintf(pFile,"%s no signal\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str());
+          fprintf(pFile,"%s no signal\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str());
           fclose (pFile);
 #endif
         }

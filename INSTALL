@@ -11,12 +11,12 @@
                                                          
                                                          
                                                          
-Installing JTDX
+Installing atdx
 =================
 
-Binary packages of JTDX are available from the project web site:
+Binary packages of atdx are available from the project web site:
 
-       https://jtdx.tech
+       https://atdx.tech
 
 
 Building from Source
@@ -28,7 +28,7 @@ For MS  Windows see the section  "Building from Source on  MS Windows"
 below. For  Apple Mac see the  section "Building from Source  on Apple
 Mac".
 
-Qt v5, preferably v5.9 or later is required to build JTDX
+Qt v5, preferably v5.9 or later is required to build atdx
 
 Qt v5 multimedia  support and serial port is necessary  as well as the
 core  Qt   v5  components,  normally  installing   the  Qt  multimedia
@@ -53,12 +53,12 @@ interface then it is required.
 The Hamlib  library is  required. Currently JTX  needs to  be built
 using a  forked version of the  Hamlib git master. This  fork contains
 patches  not yet  accepted by  the Hamlib  development team  which are
-essential for  correct operation of  JTDX. To build the  Hamlib fork
+essential for  correct operation of  atdx. To build the  Hamlib fork
 from sources something like the following recipe should suffice:
 
 $ mkdir ~/hamlib-prefix
 $ cd ~/hamlib-prefix
-$ git clone git://git.code.sf.net/p/jtdx/hamlib src
+$ git clone git://git.code.sf.net/p/atdx/hamlib src
 $ cd src
 $ ./bootstrap
 $ mkdir ../build
@@ -73,7 +73,7 @@ $ make install-strip
 
 This will build a binary  hamlib package located at ~/hamlib-prefix so
 you will need  to add that to your CMAKE_PREFIX_PATH  variable in your
-JTDX build.  On Linux  that is  probably the only  path you  have on
+atdx build.  On Linux  that is  probably the only  path you  have on
 CMAKE_PREFIX_PATH  unless  you  are   using  a  locally  installed  Qt
 installation.
 
@@ -81,14 +81,14 @@ To get the  sources either download and extract a  source tarball from
 the project web site or preferably fetch the sources directly from the
 project's git repository.
 
-$ mkdir -p ~/jtdx-prefix/build
-$ cd ~/jtdx-prefix
-$ git clone git://git.code.sf.net/p/jtdx/code src
+$ mkdir -p ~/atdx-prefix/build
+$ cd ~/atdx-prefix
+$ git clone git://git.code.sf.net/p/atdx/code src
 
 
-To build JTDX you will need CMake and asciidoc installed.
+To build atdx you will need CMake and asciidoc installed.
 
-$ cd ~/jtdx-prefix/build
+$ cd ~/atdx-prefix/build
 $ cmake -D CMAKE_PREFIX_PATH=~/hamlib-prefix ../src
 $ cmake --build .
 $ cmake --build . --target install
@@ -97,13 +97,13 @@ The recipe  above will install  into /usr by  default, if you  wish to
 install  in  you own  directory  you  can  add  a prefix-path  to  the
 configure step like:
 
-$ cd ~/jtdx-prefix/build
+$ cd ~/atdx-prefix/build
 $ cmake -D CMAKE_PREFIX_PATH=~/hamlib-prefix \
-   -D CMAKE_INSTALL_PREFIX=~/jtdx-prefix ../src
+   -D CMAKE_INSTALL_PREFIX=~/atdx-prefix ../src
 $ cmake --build .
 $ cmake --build . --target install
 
-this will install JTDX at ~/jtdx-prefix.
+this will install atdx at ~/atdx-prefix.
 
 
 Building from Source on MS Windows
@@ -111,7 +111,7 @@ Building from Source on MS Windows
 
 Because  building on  MS  Windows  is quite  complicated  there is  an
 Software Development Kit available  that provides all the prerequisite
-libraries and tools for building  JTDX. This SDK is called JT-SDK-QT
+libraries and tools for building  atdx. This SDK is called JT-SDK-QT
 which is documented here:
 
 http://physics.princeton.edu/pulsar/K1JT/wsjtx-doc/dev-guide-main.html
@@ -129,19 +129,19 @@ http://libusb.info/,  install   it  in  a  convenient   location  like
 C:\Tools.
 
 On Windows there is a complication in that the compilers used to build
-Qt  and JTDX  are the  MinGW ones  bundled with  the Qt  package but
+Qt  and atdx  are the  MinGW ones  bundled with  the Qt  package but
 Hamlib needs to be build from an MSYS shell with the tools required to
 build  an autotools  project. This  means that  you need  to tell  the
 Hamlib configuration  to use  the Qt bundled  MinGW compilers  (if you
 don't  then  the  thread  support   library  use  by  Hamlib  will  be
-incompatible  with that  used by  Qt and  JTDX). So  on Windows  the
+incompatible  with that  used by  Qt and  atdx). So  on Windows  the
 Hamlib build recipe is something like:
 
 In an MSYS shell:-
 
 $ mkdir ~/hamib-prefix
 $ cd ~/hamlib-prefix
-$ git clone git://git.code.sf.net/p/jtdx/hamlib src
+$ git clone git://git.code.sf.net/p/atdx/hamlib src
 $ cd src
 $ git checkout integration
 $ ./bootstrap
@@ -208,7 +208,7 @@ $ sudo port install autoconf automake \
    libtool pkgconfig texinfo gcc9 asciidoc \
    asciidoctor fftw-3-single +gcc9 libusb-devel
 
-Once complete you should have all the tools required to build JTDX.
+Once complete you should have all the tools required to build atdx.
 
 Uninstalling MacPorts
 ---------------------
@@ -224,7 +224,7 @@ First fetch hamlib from the repository, in this case my fork of Hamlib
 
 $ mkdir -p ~/hamlib-prefix/build
 $ cd ~/hamlib-prefix
-$ git clone git://git.code.sf.net/p/jtdx/hamlib src
+$ git clone git://git.code.sf.net/p/atdx/hamlib src
 $ cd src
 $ ./bootstrap
 
@@ -264,7 +264,7 @@ X 64-bit. The binary installer is here:
 
 The    binary   Qt    distributions    prior   to    Qt   v5.4    from
 http://www.qt.io/download unfortunately are built to use the libstdc++
-C++ support  library, JTDX uses  a less geriatric C++  dialect which
+C++ support  library, atdx uses  a less geriatric C++  dialect which
 uses the  libc++ C++  support library.   This means  that you  need to
 build Qt from sources. This is not difficult but does take some time.
 
@@ -323,13 +323,13 @@ $ sudo chgrp wheel /usr/local/bin
 and then retry the install command.
 
 
-JTDX
+atdx
 ------
 First fetch the source from the repository:
 
-$ mkdir -p ~/jtdx-prefix/build
-$ cd ~/jtdx-prefix
-$ git clone git://git.code.sf.net/p/jtdx/code src
+$ mkdir -p ~/atdx-prefix/build
+$ cd ~/atdx-prefix
+$ git clone git://git.code.sf.net/p/atdx/code src
 
 this links to the Git repository in a read-only fashion, if you
 intend to  contribute to the project  then you probably want  to get a
@@ -342,13 +342,13 @@ branch  or  even  a  tag  if  you want  to  build  a  prior  published
 generation. For now  we will build the latest  development sources. To
 configure:
 
-$ cd ~/jtdx-prefix/build
+$ cd ~/atdx-prefix/build
 $ FC=gfortran-mp-9 \
    cmake \
    -D CMAKE_PREFIX_PATH="/opt/local/libexec/qt5;~/hamlib-prefix;/opt/local" \
-   -D CMAKE_INSTALL_PREFIX=~/jtdx-prefix \
+   -D CMAKE_INSTALL_PREFIX=~/atdx-prefix \
    -D CMAKE_OSX_SYSROOT=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk \
-   ~/jtdx-prefix/src
+   ~/atdx-prefix/src
 
 Substitute the  Mac OS X SDK  version you have installed  in the above
 command if you have a different version from 10.15.
@@ -363,7 +363,7 @@ option above in the Hamlib section).
 If you already have the fftw3-dev  package installed on your system it
 may well get selected in preference to  the one you built above in the
 MacPorts installation.  It is  unlikely that  a prior  installation of
-libfftw3f is  correctly configured  for use in  a JTDX  package, the
+libfftw3f is  correctly configured  for use in  a atdx  package, the
 CMAKE_PREFIX_PATH above  is augmented  with the  MacPorts installation
 location  (/opt/local)  to  ensure  the  correct  libfftw3f.dylib  and
 headers are located.
@@ -373,7 +373,7 @@ To build:
 $ cmake --build .
 $ cmake --build . --target install
 
-which installs the JTDX application bundle into ~/jtdx-prefix
+which installs the atdx application bundle into ~/atdx-prefix
 
 
 Updating and Rebuilding Hamlib
@@ -392,14 +392,14 @@ $ make
 $ make install-strip
 
 
-Updating and Rebuilding JTDX
+Updating and Rebuilding atdx
 ==============================
 
 To update to the latest sources type:
 
-$ cd ~/jtdx-prefix/src
+$ cd ~/atdx-prefix/src
 $ git pull
-$ cd ~/jtdx-prefix/build
+$ cd ~/atdx-prefix/build
 $ cmake --build .
 $ cmake --build . --target install
 

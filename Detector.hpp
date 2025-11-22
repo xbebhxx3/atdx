@@ -1,11 +1,11 @@
 // This source code file was last time modified by Igor UA3DJY on 20190927
-// All changes are shown in the patch file coming together with the full JTDX source code.
+// All changes are shown in the patch file coming together with the full atdx source code.
 
 #ifndef DETECTOR_HPP__
 #define DETECTOR_HPP__
 
 #include "AudioDevice.hpp"
-#include "JTDXDateTime.h"
+#include "atdxDateTime.h"
 
 #include <QScopedArrayPointer>
 
@@ -28,7 +28,7 @@ public:
   //
   // the samplesPerFFT argument is the number after down sampling
   //
-  Detector (unsigned frameRate, double periodLengthInSeconds, JTDXDateTime * jtdxtime, unsigned downSampleFactor = 4, QObject * parent = 0);
+  Detector (unsigned frameRate, double periodLengthInSeconds, atdxDateTime * atdxtime, unsigned downSampleFactor = 4, QObject * parent = 0);
 
   void setPeriod(double p) {m_period=p;}
   bool reset () override;
@@ -59,7 +59,7 @@ private:
   // data (a signals worth) at
   // the input sample rate
   unsigned m_bufferPos;
-  JTDXDateTime * m_jtdxtime;
+  atdxDateTime * m_atdxtime;
 };
 
 #endif

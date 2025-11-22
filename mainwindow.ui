@@ -23,7 +23,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>JTDX</string>
+   <string>atdx</string>
   </property>
   <property name="styleSheet">
    <string notr="true"/>
@@ -3022,16 +3022,16 @@ ZD8,ZD9,ZF,ZK3,ZL,ZL7,ZL8,ZL9,ZP,ZS,ZS8&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</str
                  </size>
                 </property>
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Click by left mouse's button shifts JTDX internal time to provide better decoder synchronization to signals into incoming RX audio stream.&lt;br&gt;
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Click by left mouse's button shifts atdx internal time to provide better decoder synchronization to signals into incoming RX audio stream.&lt;br&gt;
 Two scenarios are supported:&lt;br&gt;
 - rough synchronization, if there are shifted signals on the waterfall and no a signal decoded, minimum power value is used in decoder to evaluate time shift till beginning of interval&lt;br&gt;
-- more precise synchronization, if there are signals decoded in previous interval and average DT is out of the -0.19 .. 0.19 sec range. Average DT value is used for JTDX time shift.&lt;br&gt;
+- more precise synchronization, if there are signals decoded in previous interval and average DT is out of the -0.19 .. 0.19 sec range. Average DT value is used for atdx time shift.&lt;br&gt;
 It is recommended to keep at least five interval gap between two consequential attempts of rough and precise synchronization.&lt;br&gt;
 Decoding of current and next interval can be broken by the time shift.&lt;br&gt;
 Note:&lt;br&gt;
 - if your computer clock difference is more than 7.5 seconds, there is a chance you will be reporting spots in wrong interval, also QSO start/end time can be affected&lt;br&gt;
 - DT of TX signal will be affected in wrong way if you are trying to compensate RX audio stream delay caused by buffering in SDR software.&lt;br&gt;&lt;br&gt;
-Click by right mouse's button sets JTDX internal time back to system time.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+Click by right mouse's button sets atdx internal time back to system time.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="styleSheet">
                  <string notr="true">QPushButton:checked {
@@ -4770,8 +4770,8 @@ list. The list can be maintained in Settings (F2).</string>
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="actionJTDX_Web_Site"/>
-    <addaction name="actionJTDX_Forum"/>
+    <addaction name="actionatdx_Web_Site"/>
+    <addaction name="actionatdx_Forum"/>
     <addaction name="download_samples_action"/>
     <addaction name="separator"/>
     <addaction name="actionKeyboard_shortcuts"/>
@@ -4901,7 +4901,7 @@ list. The list can be maintained in Settings (F2).</string>
   </action>
   <action name="actionAbout">
    <property name="text">
-    <string>About JTDX</string>
+    <string>About atdx</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+F1</string>
@@ -5066,9 +5066,9 @@ list. The list can be maintained in Settings (F2).</string>
     <bool>true</bool>
    </property>
   </action>
-  <action name="actionJTDX_Web_Site">
+  <action name="actionatdx_Web_Site">
    <property name="text">
-    <string>JTDX Web site</string>
+    <string>atdx Web site</string>
    </property>
    <property name="shortcut">
     <string>F1</string>
@@ -5320,12 +5320,12 @@ list. The list can be maintained in Settings (F2).</string>
     <string>F2</string>
    </property>
   </action>
-  <action name="actionJTDX_Forum">
+  <action name="actionatdx_Forum">
    <property name="enabled">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>JTDX forum</string>
+    <string>atdx forum</string>
    </property>
   </action>
   <action name="actionOpen_log_directory">

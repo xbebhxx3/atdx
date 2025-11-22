@@ -5,7 +5,7 @@
 #include <QDir>
 #include <QFileInfo>
 
-#include "JTDXMessageBox.hpp"
+#include "atdxMessageBox.hpp"
 #include "Directory.hpp"
 
 FileNode::FileNode (QTreeWidgetItem * parent
@@ -26,7 +26,7 @@ FileNode::FileNode (QTreeWidgetItem * parent
 
 void FileNode::error (QString const& title, QString const& message)
 {
-  JTDXMessageBox::warning_message (treeWidget (), "", title, message);
+  atdxMessageBox::warning_message (treeWidget (), "", title, message);
 }
 
 bool FileNode::sync (bool local)

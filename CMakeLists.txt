@@ -22,7 +22,7 @@ Change this to the newest SDK available that you can install on your system (>10
 Do not override this if you intend to build an official deployable installer.")
 endif (APPLE)
 
-project (jtdx C CXX Fortran)
+project (atdx C CXX Fortran)
 
 #
 # CMake policies
@@ -49,7 +49,7 @@ message (STATUS "Building ${CMAKE_PROJECT_NAME}-${wsjtx_VERSION}")
 #
 # project information
 #
-set (PROJECT_NAME "JTDX")
+set (PROJECT_NAME "atdx")
 if (WIN32)
   set (PROJECT_VENDOR "Igor Chernikov, UA3DJY and Arvo Jarve, ES1JA")
   set (PROJECT_CONTACT "Igor Chernikov <c_igor@inbox.ru>, Arvo Jarve <arvo.jarve@eesti.ee>")
@@ -59,13 +59,13 @@ else ()
   set (PROJECT_CONTACT "Igor Chernikov <c_igor@inbox.ru>, Arvo Järve <arvo.jarve@eesti.ee>")
   set (PROJECT_COPYRIGHT "Copyright (C) 2016-2020 by Igor Chernikov, UA3DJY and Arvo Järve, ES1JA.")
 endif (WIN32)
-set (PROJECT_HOMEPAGE http://sourceforge.net/projects/jtdx/)
+set (PROJECT_HOMEPAGE http://sourceforge.net/projects/atdx/)
 set (PROJECT_MANUAL index.php/videos-guides)
-set (PROJECT_MANUAL_DIRECTORY_URL http://sourceforge.net/projects/jtdx/)
-set (PROJECT_SAMPLES_URL http://jtdx.tech/public_html/downloads/)
+set (PROJECT_MANUAL_DIRECTORY_URL http://sourceforge.net/projects/atdx/)
+set (PROJECT_SAMPLES_URL http://atdx.tech/public_html/downloads/)
 set (PROJECT_SAMPLES_UPLOAD_DEST frs.sourceforge.net:/home/frs/project/wsjt/)
 set (PROJECT_SUMMARY_DESCRIPTION "${PROJECT_NAME} - Digital Modes for Amateur Radio.")
-set (PROJECT_DESCRIPTION "JTDX: Digital Modes for Weak Signal Communications in Amateur Radio")
+set (PROJECT_DESCRIPTION "atdx: Digital Modes for Weak Signal Communications in Amateur Radio")
 #set (CMAKE_PROJECT_DESCRIPTION ${PROJECT_DESCRIPTION})
 
 set (CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake/Modules ${CMAKE_MODULE_PATH})
@@ -112,7 +112,7 @@ option (WSJT_GENERATE_DOCS "Generate documentation files." ON)
 option (WSJT_RIG_NONE_CAN_SPLIT "Allow split operation with \"None\" as rig.")
 option (WSJT_TRACE_UDP "Debugging option that turns on UDP message protocol diagnostics.")
 option (WSJT_BUILD_UTILS "Build simulators and code demonstrators." ON)
-option (JTDX_DEBUG_TO_FILE "Write debu to jtdx_debug.txt.")
+option (atdx_DEBUG_TO_FILE "Write debu to atdx_debug.txt.")
 
 CMAKE_DEPENDENT_OPTION (WSJT_HAMLIB_VERBOSE_TRACE "Debugging option that turns on full Hamlib internal diagnostics." OFF WSJT_HAMLIB_TRACE OFF)
 CMAKE_DEPENDENT_OPTION (WSJT_QDEBUG_IN_RELEASE "Leave Qt debugging statements in Release configuration." OFF
@@ -246,8 +246,8 @@ set (wsjtx_CXXSRCS
   eqsl.cpp
   wsprnet.cpp
   WSPRBandHopping.cpp
-  JTDXMessageBox.cpp
-  JTDXDateTime.cpp
+  atdxMessageBox.cpp
+  atdxDateTime.cpp
   )
 
 set (wsjt_CXXSRCS
@@ -596,7 +596,7 @@ set (message_aggregator_STYLESHEETS
 set (TOP_LEVEL_RESOURCES
   cty.dat
   lotw-user-activity.csv
-  icons/Darwin/jtdx.iconset/icon_128x128.png
+  icons/Darwin/atdx.iconset/icon_128x128.png
   contrib/decpasses.png
   contrib/dtrange.png
   )
@@ -654,7 +654,7 @@ if (APPLE)
     COMMENT "Building Icons"
     )
 else ()
-  set (WSJTX_ICON_FILE icons/windows-icons/jtdx.ico)
+  set (WSJTX_ICON_FILE icons/windows-icons/atdx.ico)
 endif (APPLE)
 
 set_source_files_properties (${WSJTX_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
@@ -973,7 +973,7 @@ set (LANGUAGES
   sv_SE
   )
 foreach (lang_ ${LANGUAGES})
-  file (TO_NATIVE_PATH translations/jtdx_${lang_}.ts ts_)
+  file (TO_NATIVE_PATH translations/atdx_${lang_}.ts ts_)
   list (APPEND TS_FILES ${ts_})
 endforeach ()  
 if (UPDATE_TRANSLATIONS)
@@ -1013,7 +1013,7 @@ add_resources (wsjtx_RESOURCES "" ${TOP_LEVEL_RESOURCES})
 add_resources (wsjtx_RESOURCES /Palettes ${PALETTE_FILES})
 add_resources (wsjtx_RESOURCES /Translations ${QM_FILES})
 
-configure_file (jtdx.qrc.in jtdx.qrc @ONLY)
+configure_file (atdx.qrc.in atdx.qrc @ONLY)
 
 
 # UI generation
@@ -1022,7 +1022,7 @@ qt5_wrap_ui (wsjtx_GENUISRCS ${wsjtx_UISRCS})
 
 # Resource generation
 qt5_add_resources (wsjtx_RESOURCES_RCC 
-  ${CMAKE_BINARY_DIR}/jtdx.qrc
+  ${CMAKE_BINARY_DIR}/atdx.qrc
   contrib/QDarkStyleSheet/qdarkstyle/style.qrc
 )
 
@@ -1081,81 +1081,81 @@ endif (WIN32)
 add_library (wsjt_qtmm STATIC ${wsjt_qtmm_CXXSRCS} ${wsjt_qtmm_GENUISRCS})
 target_link_libraries (wsjt_qtmm Qt5::Multimedia)
 
-add_executable (ft4sim lib/ft4/ft4sim.f90 jtdx.rc)
+add_executable (ft4sim lib/ft4/ft4sim.f90 atdx.rc)
 target_link_libraries (ft4sim wsjt_fort wsjt_cxx)
 
-add_executable (ft8sim lib/ft8sim.f90 jtdx.rc)
+add_executable (ft8sim lib/ft8sim.f90 atdx.rc)
 target_link_libraries (ft8sim wsjt_fort wsjt_cxx)
 
-add_executable (ft8sim_gfsk lib/ft8sim_gfsk.f90 jtdx.rc)
+add_executable (ft8sim_gfsk lib/ft8sim_gfsk.f90 atdx.rc)
 target_link_libraries (ft8sim_gfsk wsjt_fort wsjt_cxx)
 
-add_executable (jt65sim lib/jt65sim.f90 jtdx.rc)
+add_executable (jt65sim lib/jt65sim.f90 atdx.rc)
 target_link_libraries (jt65sim wsjt_fort wsjt_cxx)
 
-add_executable (jt9sim lib/jt9sim.f90 jtdx.rc)
+add_executable (jt9sim lib/jt9sim.f90 atdx.rc)
 target_link_libraries (jt9sim wsjt_fort wsjt_cxx)
 
-add_executable (jt10sim lib/jt10sim.f90 jtdx.rc)
+add_executable (jt10sim lib/jt10sim.f90 atdx.rc)
 target_link_libraries (jt10sim wsjt_fort wsjt_cxx)
 
-add_executable (jt65code lib/jt65code.f90 jtdx.rc)
+add_executable (jt65code lib/jt65code.f90 atdx.rc)
 target_link_libraries (jt65code wsjt_fort wsjt_cxx)
 
-add_executable (jt9code lib/jt9code.f90 jtdx.rc)
+add_executable (jt9code lib/jt9code.f90 atdx.rc)
 target_link_libraries (jt9code wsjt_fort wsjt_cxx)
 
 generate_version_info (wsprd_VERSION_RESOURCES
-  NAME wsprd_jtdx
+  NAME wsprd_atdx
   BUNDLE ${PROJECT_BUNDLE_NAME}
   ICON ${WSJTX_ICON_FILE}
   FILE_DESCRIPTION "WSPR mode decoder"
   )
-add_executable (wsprd_jtdx ${wsprd_CSRCS} lib/indexx.f90 lib/wsprd/osdwspr.f90 ${wsprd_VERSION_RESOURCES})
+add_executable (wsprd_atdx ${wsprd_CSRCS} lib/indexx.f90 lib/wsprd/osdwspr.f90 ${wsprd_VERSION_RESOURCES})
 
-target_include_directories (wsprd_jtdx PRIVATE ${FFTW3_INCLUDE_DIRS})
-target_link_libraries (wsprd_jtdx ${FFTW3_LIBRARIES})
+target_include_directories (wsprd_atdx PRIVATE ${FFTW3_INCLUDE_DIRS})
+target_link_libraries (wsprd_atdx ${FFTW3_LIBRARIES})
 
 add_executable (wsprsim ${wsprsim_CSRCS})
 
 # build the jt9 slow mode decoder driver
-generate_version_info (jtdxjt9_VERSION_RESOURCES
-  NAME jtdxjt9
+generate_version_info (atdxjt9_VERSION_RESOURCES
+  NAME atdxjt9
   BUNDLE ${PROJECT_BUNDLE_NAME}
   ICON ${WSJTX_ICON_FILE}
-  FILE_DESCRIPTION "jtdxjt9 - JTDX slow mode decoder"
+  FILE_DESCRIPTION "atdxjt9 - atdx slow mode decoder"
   )
 
-add_executable (jtdxjt9 lib/jt9.f90 lib/jt9a.f90 ${jt9_CXXSRCS} jtdx.rc ${jtdjt9_VERSION_RESOURCES})
+add_executable (atdxjt9 lib/jt9.f90 lib/jt9a.f90 ${jt9_CXXSRCS} atdx.rc ${jtdjt9_VERSION_RESOURCES})
 if (${OPENMP_FOUND} OR APPLE)
   if (APPLE)
     # On  Mac  we don't  have  working  OpenMP  support in  the  C/C++
     # compilers so we  have to manually set the  correct linking flags
     # and libraries to get OpenMP support in jt9.
-    set_target_properties (jtdxjt9
+    set_target_properties (atdxjt9
       PROPERTIES
       Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/fortran_modules_omp
       LINK_LIBRARIES "gomp;gcc_s.1" # assume GNU libgcc OpenMP
       )
-      target_compile_options (jtdxjt9
+      target_compile_options (atdxjt9
 	PRIVATE
      	$<$<COMPILE_LANGUAGE:Fortran>:-fopenmp>   # assumes GNU style Fortran compiler
 	)
   else (APPLE)
      if (OpenMP_C_FLAGS)
-       set_target_properties (jtdxjt9
+       set_target_properties (atdxjt9
          PROPERTIES
          COMPILE_FLAGS "${OpenMP_C_FLAGS}"
          LINK_FLAGS "${OpenMP_C_FLAGS}"
          )
      endif (OpenMP_C_FLAGS)
-     set_target_properties (jtdxjt9
+     set_target_properties (atdxjt9
 	PROPERTIES
         Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/fortran_modules_omp
         )
   endif (APPLE)
   if (WIN32)
-     set_target_properties (jtdxjt9
+     set_target_properties (atdxjt9
        PROPERTIES
 ##       COMPILE_FLAGS "${OpenMP_C_FLAGS}"
 ##       LINK_FLAGS "${OpenMP_C_FLAGS}"
@@ -1164,32 +1164,32 @@ if (${OPENMP_FOUND} OR APPLE)
 ##       Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/fortran_modules_omp
       )
   endif ()
-  target_link_libraries (jtdxjt9 wsjt_fort_omp wsjt_cxx Qt5::Core)
+  target_link_libraries (atdxjt9 wsjt_fort_omp wsjt_cxx Qt5::Core)
 else (${OPENMP_FOUND} OR APPLE)
-  target_link_libraries (jtdxjt9 wsjt_fort wsjt_cxx Qt5::Core)
+  target_link_libraries (atdxjt9 wsjt_fort wsjt_cxx Qt5::Core)
 endif (${OPENMP_FOUND} OR APPLE)
 
 # build the main application
-generate_version_info (jtdx_VERSION_RESOURCES
-  NAME jtdx
+generate_version_info (atdx_VERSION_RESOURCES
+  NAME atdx
   BUNDLE ${PROJECT_BUNDLE_NAME}
   ICON ${WSJTX_ICON_FILE}
   )
 
-add_executable (jtdx MACOSX_BUNDLE
+add_executable (atdx MACOSX_BUNDLE
   ${wsjtx_CXXSRCS}
   ${wsjtx_GENUISRCS}
-  jtdx.rc
+  atdx.rc
   ${WSJTX_ICON_FILE}
   ${wsjtx_RESOURCES_RCC}
-  ${jtdx_VERSION_RESOURCES}
+  ${atdx_VERSION_RESOURCES}
   )
 
 if (WSJT_CREATE_WINMAIN)
-  set_target_properties (jtdx PROPERTIES WIN32_EXECUTABLE ON)
+  set_target_properties (atdx PROPERTIES WIN32_EXECUTABLE ON)
 endif (WSJT_CREATE_WINMAIN)
 
-set_target_properties (jtdx PROPERTIES
+set_target_properties (atdx PROPERTIES
   MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/Darwin/Info.plist.in"
   MACOSX_BUNDLE_INFO_STRING "${WSJTX_DESCRIPTION_SUMMARY}"
   MACOSX_BUNDLE_ICON_FILE "${WSJTX_ICON_FILE}"
@@ -1199,25 +1199,25 @@ set_target_properties (jtdx PROPERTIES
   MACOSX_BUNDLE_BUNDLE_NAME "${PROJECT_NAME}"
   MACOSX_BUNDLE_BUNDLE_EXECUTABLE_NAME "${PROJECT_NAME}"
   MACOSX_BUNDLE_COPYRIGHT "${PROJECT_COPYRIGHT}"
-  MACOSX_BUNDLE_GUI_IDENTIFIER "tech.jtdx"
+  MACOSX_BUNDLE_GUI_IDENTIFIER "tech.atdx"
   )
 
-target_include_directories (jtdx PRIVATE ${FFTW3_INCLUDE_DIRS})
+target_include_directories (atdx PRIVATE ${FFTW3_INCLUDE_DIRS})
 if (APPLE)
-  target_link_libraries (jtdx Qt5::SerialPort wsjt_fort wsjt_cxx wsjt_qt wsjt_qtmm ${FFTW3_LIBRARIES})
+  target_link_libraries (atdx Qt5::SerialPort wsjt_fort wsjt_cxx wsjt_qt wsjt_qtmm ${FFTW3_LIBRARIES})
 else (APPLE)
-  target_link_libraries (jtdx Qt5::SerialPort wsjt_fort_omp wsjt_cxx wsjt_qt wsjt_qtmm ${FFTW3_LIBRARIES})
+  target_link_libraries (atdx Qt5::SerialPort wsjt_fort_omp wsjt_cxx wsjt_qt wsjt_qtmm ${FFTW3_LIBRARIES})
   if (OpenMP_C_FLAGS)
-    set_target_properties (jtdx PROPERTIES
+    set_target_properties (atdx PROPERTIES
       COMPILE_FLAGS "${OpenMP_C_FLAGS}"
       LINK_FLAGS "${OpenMP_C_FLAGS}"
       )
   endif (OpenMP_C_FLAGS)
-  set_target_properties (jtdx PROPERTIES
+  set_target_properties (atdx PROPERTIES
     Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/fortran_modules_omp
     )
   if (WIN32)
-    set_target_properties (jtdx PROPERTIES
+    set_target_properties (atdx PROPERTIES
       LINK_FLAGS -Wl,--stack,16777216
       )
   endif ()
@@ -1231,24 +1231,24 @@ qt5_add_resources (message_aggregator_RESOURCES_RCC
 )
 add_executable (message_aggregator
   ${message_aggregator_CXXSRCS}
-  jtdx.rc
+  atdx.rc
   ${message_aggregator_RESOURCES_RCC}
   )
 target_link_libraries (message_aggregator wsjt_qt Qt5::Widgets)
 
-generate_version_info (udp_daemon_jtdx_VERSION_RESOURCES
-  NAME udp_daemon_jtdx
+generate_version_info (udp_daemon_atdx_VERSION_RESOURCES
+  NAME udp_daemon_atdx
   BUNDLE ${PROJECT_BUNDLE_NAME}
   ICON ${WSJTX_ICON_FILE}
   FILE_DESCRIPTION "Example WSJT-X UDP Message Protocol daemon"
   )
 
-add_executable (udp_daemon_jtdx
+add_executable (udp_daemon_atdx
   ${UDPDaemon_CXXSRCS}
-  jtdx.rc
-  ${udp_daemon_jtdx_VERSION_RESOURCES}
+  atdx.rc
+  ${udp_daemon_atdx_VERSION_RESOURCES}
   )
-target_link_libraries (udp_daemon_jtdx Qt5::Core Qt5::Network)
+target_link_libraries (udp_daemon_atdx Qt5::Core Qt5::Network)
 
 if (WSJT_CREATE_WINMAIN)
   set_target_properties (message_aggregator PROPERTIES WIN32_EXECUTABLE ON)
@@ -1257,24 +1257,24 @@ endif (WSJT_CREATE_WINMAIN)
 if (UNIX)
   if (NOT WSJT_SKIP_MANPAGES)
     add_subdirectory (manpages)
-    add_dependencies (jtdx manpages)
+    add_dependencies (atdx manpages)
   endif (NOT WSJT_SKIP_MANPAGES)
   if (NOT APPLE)
     add_subdirectory (debian)
-    add_dependencies (jtdx debian)
+    add_dependencies (atdx debian)
   endif (NOT APPLE)
 endif (UNIX)
 
 #
 # installation
 #
-install (TARGETS jtdx
+install (TARGETS atdx
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime
   BUNDLE DESTINATION . COMPONENT runtime
   )
 
-#install (TARGETS jtdxjt9 jt65code jt9code wsprd message_aggregator udp_daemon
-install (TARGETS jtdxjt9 wsprd_jtdx udp_daemon_jtdx
+#install (TARGETS atdxjt9 jt65code jt9code wsprd message_aggregator udp_daemon
+install (TARGETS atdxjt9 wsprd_atdx udp_daemon_atdx
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime
   BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime
   )
@@ -1283,21 +1283,21 @@ install (PROGRAMS
   ${RIGCTL_EXE}
   DESTINATION ${CMAKE_INSTALL_BINDIR}
   #COMPONENT runtime
-  RENAME rigctl-jtdx${CMAKE_EXECUTABLE_SUFFIX}
+  RENAME rigctl-atdx${CMAKE_EXECUTABLE_SUFFIX}
   )
 
 install (PROGRAMS
   ${RIGCTLD_EXE}
   DESTINATION ${CMAKE_INSTALL_BINDIR}
   #COMPONENT runtime
-  RENAME rigctld-jtdx${CMAKE_EXECUTABLE_SUFFIX}
+  RENAME rigctld-atdx${CMAKE_EXECUTABLE_SUFFIX}
   )
 
 install (PROGRAMS
   ${RIGCTLCOM_EXE}
   DESTINATION ${CMAKE_INSTALL_BINDIR}
   #COMPONENT runtime
-  RENAME rigctlcom-jtdx${CMAKE_EXECUTABLE_SUFFIX}
+  RENAME rigctlcom-atdx${CMAKE_EXECUTABLE_SUFFIX}
   )
 
 install (FILES
@@ -1328,7 +1328,7 @@ install (FILES
 if (APPLE)
     install (FILES
         Darwin/ReadMe.txt
-        Darwin/com.jtdx.sysctl.plist
+        Darwin/com.atdx.sysctl.plist
         DESTINATION .
         #COMPONENT runtime
     )
@@ -1372,12 +1372,12 @@ if (NOT WIN32 AND NOT APPLE)
   # install a desktop file so wsjtx appears in the application start
   # menu with an icon
   install (
-    FILES jtdx.desktop
+    FILES atdx.desktop
     DESTINATION share/applications
     #COMPONENT runtime
     )
   install (
-    FILES icons/Unix/jtdx_icon.png
+    FILES icons/Unix/atdx_icon.png
     DESTINATION share/pixmaps
     #COMPONENT runtime
     )
@@ -1395,12 +1395,12 @@ if (NOT is_debug_build)
 
   if (APPLE)
     set (CMAKE_POSTFLIGHT_SCRIPT
-      "${jtdx_BINARY_DIR}/postflight.sh")
+      "${atdx_BINARY_DIR}/postflight.sh")
     set (CMAKE_POSTUPGRADE_SCRIPT
-      "${jtdx_BINARY_DIR}/postupgrade.sh")
-    configure_file ("${jtdx_SOURCE_DIR}/Darwin/postflight.sh.in"
+      "${atdx_BINARY_DIR}/postupgrade.sh")
+    configure_file ("${atdx_SOURCE_DIR}/Darwin/postflight.sh.in"
       "${CMAKE_POSTFLIGHT_SCRIPT}")
-    configure_file ("${jtdx_SOURCE_DIR}/Darwin/postupgrade.sh.in"
+    configure_file ("${atdx_SOURCE_DIR}/Darwin/postupgrade.sh.in"
       "${CMAKE_POSTUPGRADE_SCRIPT}")
   endif ()
 
@@ -1541,7 +1541,7 @@ endif (NOT is_debug_build)
 set (CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/package_description.txt")
 set (CPACK_MONOLITHIC_INSTALL 1)
 set (CPACK_PACKAGE_NAME "${CMAKE_PROJECT_NAME}")
-#set (CPACK_PACKAGE_NAME JTDX)
+#set (CPACK_PACKAGE_NAME atdx)
 set (CPACK_PACKAGE_VERSION_MAJOR ${WSJTX_VERSION_MAJOR})
 set (CPACK_PACKAGE_VERSION_MINOR ${WSJTX_VERSION_MINOR})
 set (CPACK_PACKAGE_VERSION_PATCH ${WSJTX_VERSION_PATCH})

@@ -36,9 +36,9 @@
 #include "psk_reporter.h"
 #include "logbook/logbook.h"
 #include "decodedtext.h"
-#include "JTDXMessageBox.hpp"
+#include "atdxMessageBox.hpp"
 #include "qsohistory.h"
-#include "JTDXDateTime.h"
+#include "atdxDateTime.h"
 
 
 //--------------------------------------------------------------- MainWindow
@@ -141,8 +141,8 @@ private slots:
   void on_singleQSOButton_clicked (bool);
   void on_bypassButton_clicked (bool);
   void on_pbSpotDXCall_clicked ();  
-  void on_actionJTDX_Web_Site_triggered();
-  void on_actionJTDX_Forum_triggered();
+  void on_actionatdx_Web_Site_triggered();
+  void on_actionatdx_Forum_triggered();
 //  void on_actionLocal_User_Guide_triggered();
   void on_actionWide_Waterfall_triggered();
   void on_actionOpen_triggered();
@@ -389,7 +389,7 @@ private:
 private:
   void hideMenus (bool b);
 
-  JTDXDateTime * m_jtdxtime;
+  atdxDateTime * m_atdxtime;
   QProcessEnvironment const& m_env;
   QDir m_dataDir;
   bool m_valid;
@@ -403,7 +403,7 @@ private:
   Configuration m_config;
   WSPRBandHopping m_WSPR_band_hopping;
   bool m_WSPR_tx_next;
-  JTDXMessageBox m_rigErrorMessageBox;
+  atdxMessageBox m_rigErrorMessageBox;
   QScopedPointer<SampleDownloader> m_sampleDownloader;
 
   QScopedPointer<WideGraph> m_wideGraph;
@@ -632,7 +632,7 @@ private:
   QLabel * lastlogged_label;
   QLabel * qso_count_label;
 
-  JTDXMessageBox msgBox0;
+  atdxMessageBox msgBox0;
 
   QFuture<void> m_wav_future;
   QFutureWatcher<void> m_wav_future_watcher;
@@ -640,7 +640,7 @@ private:
 
   QFileSystemWatcher *fsWatcher;
 
-  NonInheritingProcess proc_jtdxjt9;
+  NonInheritingProcess proc_atdxjt9;
   NonInheritingProcess p1;
   NonInheritingProcess p3;
 
@@ -699,7 +699,7 @@ private:
   QDateTime m_dateTimeQSOOn;
   QsoHistory::Status m_status;
 
-  QSharedMemory *mem_jtdxjt9;
+  QSharedMemory *mem_atdxjt9;
   LogBook m_logBook;
   QsoHistory m_qsoHistory;
   QsoHistory m_qsoHistory2;
@@ -795,7 +795,7 @@ private:
                           , Frequency frequency
                           , QString const& his_call
                           , QString const& his_grid
-                          , JTDXDateTime * jtdxtime) const;
+                          , atdxDateTime * atdxtime) const;
   void read_wav_file (QString const& fname);
   bool subProcessFailed (QProcess *, int exit_code, QProcess::ExitStatus);
   void subProcessError (QProcess *, QProcess::ProcessError);

@@ -1,5 +1,5 @@
 ! This source code file was last time modified by Igor UA3DJY on August 21st, 2017
-! All changes are shown in the patch file coming together with the full JTDX source code.
+! All changes are shown in the patch file coming together with the full atdx source code.
 
 subroutine decode65a(newfft,f0,ntrials,naggressive,hint_on,mycall,hiscall, &
    hisgrid,sync2,a,dt,nft,decoded,ncand_lt9,hintedrxfreq,nfqso,hint,npass1,  &

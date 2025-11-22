@@ -1,5 +1,5 @@
 ! This source code file was last time modified by Igor Chernikov UA3DJY on July 07th, 2016.
-! All changes are shown in the patch file coming together with the full JTDX source code.
+! All changes are shown in the patch file coming together with the full atdx source code.
 
 subroutine peakup(ym,y0,yp,dx)
 

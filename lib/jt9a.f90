@@ -10,14 +10,14 @@ subroutine jt9a()
 
 ! These routines connect the shared memory region to the decoder.
   interface
-     function address_jtdxjt9()
+     function address_atdxjt9()
        use, intrinsic :: iso_c_binding, only: c_ptr
-       type(c_ptr) :: address_jtdxjt9
-     end function address_jtdxjt9
+       type(c_ptr) :: address_atdxjt9
+     end function address_atdxjt9
   end interface
 
-  integer*1 attach_jtdxjt9
-  integer size_jtdxjt9
+  integer*1 attach_atdxjt9
+  integer size_atdxjt9
 ! Multiple instances:
   character*80 mykey
   type(dec_data), pointer, volatile :: shared_data !also makes target volatile
@@ -35,9 +35,9 @@ subroutine jt9a()
 ! Multiple instances: set the shared memory key before attaching
   mykey=trim(repeat(shm_key,1))
   i0 = len(mykey)
-  i0=setkey_jtdxjt9(trim(mykey))
+  i0=setkey_atdxjt9(trim(mykey))
 
-  i1=attach_jtdxjt9()
+  i1=attach_atdxjt9()
 
 10 inquire(file=trim(temp_dir)//'/.lock',exist=fileExists)
   if(fileExists) then
@@ -49,19 +49,19 @@ subroutine jt9a()
 
   inquire(file=trim(temp_dir)//'/.quit',exist=fileExists)
   if(fileExists) then
-     i1=detach_jtdxjt9()
+     i1=detach_atdxjt9()
      go to 999
   endif
   if(i1.eq.999999) stop                  !Silence compiler warning
 
-  nbytes=size_jtdxjt9()
+  nbytes=size_atdxjt9()
   if(nbytes.le.0) then
-     print*,'jt9a: Shared memory mem_jtdxjt9 does not exist.'
-     print*,"Must start 'jtdxjt9 -s <thekey>' from within WSJT-X."
+     print*,'jt9a: Shared memory mem_atdxjt9 does not exist.'
+     print*,"Must start 'atdxjt9 -s <thekey>' from within WSJT-X."
      go to 999
   endif
-  call c_f_pointer(address_jtdxjt9(),shared_data)
-  local_params=shared_data%params !save a copy because jtdx.exe carries on accessing
+  call c_f_pointer(address_atdxjt9(),shared_data)
+  local_params=shared_data%params !save a copy because atdx.exe carries on accessing
   call flush(6)
 
   nnmode=local_params%nmode

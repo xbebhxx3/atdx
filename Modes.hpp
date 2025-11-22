@@ -1,5 +1,5 @@
 // This source code file was last time modified by Igor UA3DJY on 20190926
-// All changes are shown in the patch file coming together with the full JTDX source code.
+// All changes are shown in the patch file coming together with the full atdx source code.
 
 #ifndef MODES_HPP__
 #define MODES_HPP__

@@ -1,5 +1,5 @@
 ! This source code file was last time modified by Igor UA3DJY on 20190220
-! All changes are shown in the patch file coming together with the full JTDX source code.
+! All changes are shown in the patch file coming together with the full atdx source code.
 
 subroutine bpdecode174_91(llr,apmask,maxiterations,message77,cw,nharderror,iter)
 !

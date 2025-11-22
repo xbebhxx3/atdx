@@ -13,7 +13,7 @@
 #include "Radio.hpp"
 #include <QRegularExpression>
 #include <QtMath>
-#include "JTDXDateTime.h"
+#include "atdxDateTime.h"
 class QsoHistory
 {
  public:
@@ -31,7 +31,7 @@ class QsoHistory
 	int blacklist(QString const& callsign);
 	void calllist(QString const& callsign,int level, unsigned time);
 	int reset_count(QString const& callsign,Status status = NONE);
-	JTDXDateTime * jtdxtime;
+	atdxDateTime * atdxtime;
  private:
  	QRegularExpression _gridRe = QRegularExpression("^[A-R]{2,2}[0-9]{2,2}[A-R]{0,2}[0-9]{0,2}[A-R]{0,2}");
 

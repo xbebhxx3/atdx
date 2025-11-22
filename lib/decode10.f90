@@ -1,5 +1,5 @@
 ! This source code file was last time modified by Igor UA3DJY on June 10th, 2017
-! All changes are shown in the patch file coming together with the full JTDX source code.
+! All changes are shown in the patch file coming together with the full atdx source code.
 
 subroutine decode10(i1SoftSymbols,limit,msg,freemsg,i4Decoded6BitWords,mrs,mrs2,hint, &
            stophint,nlasttx,mycall,hiscall,hisgrid,rxfreq,s3,i4GrayCodedSym,hintdec, &

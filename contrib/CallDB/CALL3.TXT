@@ -1,4 +1,4 @@
-// HF + 6m band JT65/JT9 callsign+grid square database for JTDX software
+// HF + 6m band JT65/JT9 callsign+grid square database for atdx software
 // being used by decoders based on the matched filter(button Hint)
 // and for filtering out some false FTRSD decodes. 
 // Contains 34323 unique callsigns.
@@ -8,14 +8,14 @@
 // and collected from http://hamspots.net resource.  
 //
 // This file shall be put in the log directory (File->Open log directory) 
-// to get maximum decoding efficiency from JTDX software. 
+// to get maximum decoding efficiency from atdx software. 
 //
 // Created by Igor UA3DJY on June 12th, 2017, using raw data collected
 // between November 1st 2016 and June 12th 2017, Python script 
 // made by Arvo ES1JA and Perl scripts for data processing,
 // with grateful acknowledgement to Laurie VK3AMA for the contribution.
 //
-// This file is not compatible with JTDX software versions 
+// This file is not compatible with atdx software versions 
 // earlier than v17.6
 //
 2D0DRM,IO74,,,

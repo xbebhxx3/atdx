@@ -1,5 +1,5 @@
 ! This source code file was last time modified by Igor UA3DJY on April 29th, 2017
-! All changes are shown in the patch file coming together with the full JTDX source code.
+! All changes are shown in the patch file coming together with the full atdx source code.
 
 subroutine chkss10(ss2,freq,drift,schk,qualf,syncro)
 

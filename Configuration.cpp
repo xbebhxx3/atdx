@@ -178,7 +178,7 @@
 #include "FrequencyList.hpp"
 #include "StationList.hpp"
 #include "NetworkServerLookup.hpp"
-#include "JTDXMessageBox.hpp"
+#include "atdxMessageBox.hpp"
 
 #include "pimpl_impl.hpp"
 
@@ -544,7 +544,7 @@ private:
   Q_SLOT void on_bandComboBox_5_currentTextChanged (QString const&);
 
   // typenames used as arguments must match registered type names :(
-  Q_SIGNAL void start_transceiver (unsigned seqeunce_number,JTDXDateTime * jtdxtime) const;
+  Q_SIGNAL void start_transceiver (unsigned seqeunce_number,atdxDateTime * atdxtime) const;
   Q_SIGNAL void set_transceiver (Transceiver::TransceiverState const&,
                                  unsigned sequence_number) const;
   Q_SIGNAL void stop_transceiver () const;
@@ -559,7 +559,7 @@ private:
 
   QSettings * settings_;
 
-  JTDXDateTime * jtdxtime_;
+  atdxDateTime * atdxtime_;
   
   QDir doc_dir_;
   QDir data_dir_;
@@ -1385,15 +1385,15 @@ Configuration::impl::impl (Configuration * self, QSettings * settings, QWidget *
         if (!temp_dir_.mkpath (unique_directory)
             || !temp_dir_.cd (unique_directory))
           {
-            JTDXMessageBox::critical_message (this, "JTDX", tr ("Create temporary directory error: ") + temp_dir_.absolutePath ());
+            atdxMessageBox::critical_message (this, "atdx", tr ("Create temporary directory error: ") + temp_dir_.absolutePath ());
             throw std::runtime_error {"Failed to create a temporary directory"};
           }
         if (!temp_dir_.isReadable () || !(ok = QTemporaryFile {temp_dir_.absoluteFilePath ("test")}.open ()))
           {
-            if (JTDXMessageBox::Cancel == JTDXMessageBox::critical_message (this, "JTDX",
+            if (atdxMessageBox::Cancel == atdxMessageBox::critical_message (this, "atdx",
                                                               tr ("Create temporary directory error:\n%1\n"
                                                                   "Another application may be locking the directory").arg (temp_dir_.absolutePath ()),"","",
-                                                              JTDXMessageBox::Retry | JTDXMessageBox::Cancel))
+                                                              atdxMessageBox::Retry | atdxMessageBox::Cancel))
               {
                 throw std::runtime_error {"Failed to create a usable temporary directory"};
               }
@@ -1408,7 +1408,7 @@ Configuration::impl::impl (Configuration * self, QSettings * settings, QWidget *
     QDir data_dir {QStandardPaths::writableLocation (QStandardPaths::DataLocation)};
     if (!data_dir.mkpath ("."))
       {
-        JTDXMessageBox::critical_message (this, "JTDX", tr ("Create data directory error: ") + data_dir.absolutePath ());
+        atdxMessageBox::critical_message (this, "atdx", tr ("Create data directory error: ") + data_dir.absolutePath ());
         throw std::runtime_error {"Failed to create data directory"};
       }
 
@@ -1417,7 +1417,7 @@ Configuration::impl::impl (Configuration * self, QSettings * settings, QWidget *
     default_save_directory_ = data_dir;
     if (!default_save_directory_.mkpath (save_dir) || !default_save_directory_.cd (save_dir))
       {
-        JTDXMessageBox::critical_message (this, "JTDX", tr ("Create Directory", "Cannot create directory \"") +
+        atdxMessageBox::critical_message (this, "atdx", tr ("Create Directory", "Cannot create directory \"") +
                                default_save_directory_.absoluteFilePath (save_dir) + "\".");
         throw std::runtime_error {"Failed to create save directory"};
       }
@@ -1428,7 +1428,7 @@ Configuration::impl::impl (Configuration * self, QSettings * settings, QWidget *
     QString samples_dir {"samples"};
     if (!default_save_directory_.mkpath (samples_dir))
       {
-        JTDXMessageBox::critical_message (this, "JTDX", tr ("Create Directory", "Cannot create directory \"") +
+        atdxMessageBox::critical_message (this, "atdx", tr ("Create Directory", "Cannot create directory \"") +
                                default_save_directory_.absoluteFilePath (samples_dir) + "\".");
         throw std::runtime_error {"Failed to create save directory"};
       }
@@ -2606,9 +2606,9 @@ void Configuration::add_callsign_hideFilter (QString basecall)
   else { if(!curcallsigns.contains ("," + basecall + ",") && !curcallsigns.endsWith (basecall) && !curcallsigns.startsWith (basecall)) m_->callsigns_ = curcallsigns + "," + basecall; }
 }
 
-void Configuration::set_jtdxtime (JTDXDateTime * jtdxtime)
+void Configuration::set_atdxtime (atdxDateTime * atdxtime)
 {
-  m_->jtdxtime_ = jtdxtime;
+  m_->atdxtime_ = atdxtime;
 }
 
 void Configuration::impl::write_settings ()
@@ -3511,7 +3511,7 @@ void Configuration::impl::reject ()
         }
       else
         {
-//          printf("%s(%0.1f) Configuration impl_reject close rig\n",jtdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),jtdxtime_->GetOffset());
+//          printf("%s(%0.1f) Configuration impl_reject close rig\n",atdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),atdxtime_->GetOffset());
           close_rig ();
         }
     }
@@ -3540,15 +3540,15 @@ void Configuration::impl::message_box_critical (QString const& reason, QString c
   QPushButton::tr("Reset");
   QPushButton::tr("Restore Defaults");*/
 
-  JTDXMessageBox mb;
+  atdxMessageBox mb;
   mb.setText (reason);
   if (!detail.isEmpty ())
     {
       mb.setDetailedText (detail);
     }
-  mb.setStandardButtons (JTDXMessageBox::Ok);
-  mb.setDefaultButton (JTDXMessageBox::Ok);
-  mb.setIcon (JTDXMessageBox::Critical);
+  mb.setStandardButtons (atdxMessageBox::Ok);
+  mb.setDefaultButton (atdxMessageBox::Ok);
+  mb.setIcon (atdxMessageBox::Critical);
   mb.translate_buttons();
   mb.exec ();
 }
@@ -4779,7 +4779,7 @@ void Configuration::impl::on_pbWorkedCall_clicked()
 void Configuration::impl::on_decoded_text_font_push_button_clicked ()
 {
   next_decoded_text_font_ = QFontDialog::getFont (0, decoded_text_font_ , this
-                                                  , tr ("JTDX Decoded Text Font Chooser")
+                                                  , tr ("atdx Decoded Text Font Chooser")
                                                   , QFontDialog::MonospacedFonts
                                                   );
 }
@@ -4899,7 +4899,7 @@ void Configuration::impl::on_grid_line_edit_editingFinished ()
 {
   auto text = ui_->grid_line_edit->text (); auto grid_size = text.length();
   if (grid_size == 3 || grid_size == 2 || grid_size == 1) {
-    JTDXMessageBox::critical_message (this, "JTDX", tr ("Enter Grid error: 4/6/8/10 char grid will be accepted"));
+    atdxMessageBox::critical_message (this, "atdx", tr ("Enter Grid error: 4/6/8/10 char grid will be accepted"));
     ui_->grid_line_edit->setFocus();
     ui_->grid_line_edit->clear ();
   }
@@ -5448,7 +5448,7 @@ void Configuration::impl::load_frequencies ()
       auto const list = read_frequencies_file (file_name);
       if (list.size ()
           && (!next_frequencies_.frequency_list ().size ()
-              || JTDXMessageBox::Yes == JTDXMessageBox::query_message (this
+              || atdxMessageBox::Yes == atdxMessageBox::query_message (this
                                                                , tr ("Replace Working Frequencies")
                                                                , tr ("Are you sure you want to discard your current "
                                                                      "working frequencies and replace them with the "
@@ -5489,7 +5489,7 @@ FrequencyList_v2::FrequencyItems Configuration::impl::read_frequencies_file (QSt
   ids >> magic;
   if (qrg_magic != magic)
     {
-      JTDXMessageBox::warning_message (this, tr ("Not a valid frequencies file"), tr ("Incorrect file magic"));
+      atdxMessageBox::warning_message (this, tr ("Not a valid frequencies file"), tr ("Incorrect file magic"));
       return list;
     }
   quint32 version;
@@ -5498,7 +5498,7 @@ FrequencyList_v2::FrequencyItems Configuration::impl::read_frequencies_file (QSt
   // necessary
   if (version > qrg_version)
     {
-      JTDXMessageBox::warning_message (this, tr ("Not a valid frequencies file"), tr ("Version is too new"));
+      atdxMessageBox::warning_message (this, tr ("Not a valid frequencies file"), tr ("Version is too new"));
       return list;
     }
 
@@ -5508,7 +5508,7 @@ FrequencyList_v2::FrequencyItems Configuration::impl::read_frequencies_file (QSt
 
   if (ids.status () != QDataStream::Ok || !ids.atEnd ())
     {
-      JTDXMessageBox::warning_message (this, tr ("Not a valid frequencies file"), tr ("Contents corrupt"));
+      atdxMessageBox::warning_message (this, tr ("Not a valid frequencies file"), tr ("Contents corrupt"));
       list.clear ();
       return list;
     }
@@ -5527,17 +5527,17 @@ void Configuration::impl::save_frequencies ()
       QDataStream ods {&frequencies_file};
       auto selection_model = ui_->frequencies_table_view->selectionModel ();
       if (selection_model->hasSelection ()) {
-          JTDXMessageBox msgbox;
+          atdxMessageBox msgbox;
           msgbox.setWindowTitle(tr("Only Save Selected  Working Frequencies"));
-          msgbox.setIcon(JTDXMessageBox::Question);
+          msgbox.setIcon(atdxMessageBox::Question);
           msgbox.setText(tr("Are you sure you want to save only the "
                                                                  "working frequencies that are currently selected? "
                                                                  "Click No to save all."));
-          msgbox.setStandardButtons(JTDXMessageBox::Yes | JTDXMessageBox::No);
-          msgbox.setDefaultButton(JTDXMessageBox::No);
+          msgbox.setStandardButtons(atdxMessageBox::Yes | atdxMessageBox::No);
+          msgbox.setDefaultButton(atdxMessageBox::No);
           msgbox.translate_buttons();
           
-          if (JTDXMessageBox::Yes == msgbox.exec())
+          if (atdxMessageBox::Yes == msgbox.exec())
             {
               selection_model->select (selection_model->selection (), QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
               ods << qrg_magic << qrg_version << next_frequencies_.frequency_list (selection_model->selectedRows ());
@@ -5556,17 +5556,17 @@ void Configuration::impl::save_frequencies ()
 
 void Configuration::impl::reset_frequencies ()
 {
-  JTDXMessageBox msgbox;
+  atdxMessageBox msgbox;
   msgbox.setWindowTitle(tr("Reset Working Frequencies"));
-  msgbox.setIcon(JTDXMessageBox::Question);
+  msgbox.setIcon(atdxMessageBox::Question);
   msgbox.setText(tr("Are you sure you want to discard your current "
                                                        "working frequencies and replace them with default "
                                                        "ones?"));
-  msgbox.setStandardButtons(JTDXMessageBox::Yes | JTDXMessageBox::No);
-  msgbox.setDefaultButton(JTDXMessageBox::No);
+  msgbox.setStandardButtons(atdxMessageBox::Yes | atdxMessageBox::No);
+  msgbox.setDefaultButton(atdxMessageBox::No);
   msgbox.translate_buttons();
 
-  if (JTDXMessageBox::Yes == msgbox.exec())
+  if (atdxMessageBox::Yes == msgbox.exec())
     {
       next_frequencies_.reset_to_defaults ();
     }
@@ -5635,7 +5635,7 @@ bool Configuration::impl::have_rig ()
 {
   if (!open_rig ())
     {
-      JTDXMessageBox::critical_message (this, "JTDX", tr ("Failed to open connection to rig"));
+      atdxMessageBox::critical_message (this, "atdx", tr ("Failed to open connection to rig"));
     }
   return rig_active_;
 }
@@ -5649,7 +5649,7 @@ bool Configuration::impl::open_rig (bool force)
     {
       try
         {
-//    printf("%s(%0.1f) Configuration rig_open, active %d, force %d\n",jtdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),jtdxtime_->GetOffset(),rig_active_,force);
+//    printf("%s(%0.1f) Configuration rig_open, active %d, force %d\n",atdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),atdxtime_->GetOffset(),rig_active_,force);
 
           if (is_tci_ && rig_active_ && tci_audio_) restart_tci_device_ = true; 
           close_rig ();
@@ -5697,8 +5697,8 @@ bool Configuration::impl::open_rig (bool force)
 
           ui_->test_CAT_push_button->setStyleSheet ({});
           rig_active_ = true;
-//    printf("%s(%0.1f) Configuration rig_open, start transceiver #:%d\n",jtdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),jtdxtime_->GetOffset(),transceiver_command_number_+1);
-          Q_EMIT start_transceiver (++transceiver_command_number_,jtdxtime_); // start rig on its thread
+//    printf("%s(%0.1f) Configuration rig_open, start transceiver #:%d\n",atdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),atdxtime_->GetOffset(),transceiver_command_number_+1);
+          Q_EMIT start_transceiver (++transceiver_command_number_,atdxtime_); // start rig on its thread
           rig_params_ = gather_rig_data ();
           result = true;
         }
@@ -5747,7 +5747,7 @@ void Configuration::impl::transceiver_frequency (Frequency f)
     current_offset_ = stations_.offset (f);
     cached_rig_state_.frequency (apply_calibration (f + current_offset_));
 
-//    printf("%s(%0.1f) Configuration #:%d transceiver_frequency: %lld\n",jtdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),jtdxtime_->GetOffset(),transceiver_command_number_+1,f);
+//    printf("%s(%0.1f) Configuration #:%d transceiver_frequency: %lld\n",atdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),atdxtime_->GetOffset(),transceiver_command_number_+1,f);
     Q_EMIT set_transceiver (cached_rig_state_, ++transceiver_command_number_);
   }
 }
@@ -5777,7 +5777,7 @@ void Configuration::impl::transceiver_tx_frequency (Frequency f)
             cached_rig_state_.tx_frequency (apply_calibration (f + current_tx_offset_));
           }
 
-//        printf("%s(%0.1f) Configuration #:%d transceiver_tx_frequency: %lld\n",jtdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),jtdxtime_->GetOffset(),transceiver_command_number_+1,f);
+//        printf("%s(%0.1f) Configuration #:%d transceiver_tx_frequency: %lld\n",atdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),atdxtime_->GetOffset(),transceiver_command_number_+1,f);
         Q_EMIT set_transceiver (cached_rig_state_, ++transceiver_command_number_);
       }
     }
@@ -5789,7 +5789,7 @@ void Configuration::impl::transceiver_mode (MODE m)
   if (cached_rig_state_.mode() != m)
   {
     cached_rig_state_.mode (m);
-//    printf("%s(%0.1f) Configuration #:%d mode: %d\n",jtdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),jtdxtime_->GetOffset(),transceiver_command_number_+1,m);
+//    printf("%s(%0.1f) Configuration #:%d mode: %d\n",atdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),atdxtime_->GetOffset(),transceiver_command_number_+1,m);
     Q_EMIT set_transceiver (cached_rig_state_, ++transceiver_command_number_);
   }
 }
@@ -5799,7 +5799,7 @@ void Configuration::impl::transceiver_ptt (bool on)
   cached_rig_state_.online (true); // we want the rig online
   set_cached_mode ();
   cached_rig_state_.ptt (on);
-//  printf("%s(%0.1f) Configuration #:%d ptt: %d\n",jtdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),jtdxtime_->GetOffset(),transceiver_command_number_+1,on);
+//  printf("%s(%0.1f) Configuration #:%d ptt: %d\n",atdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),atdxtime_->GetOffset(),transceiver_command_number_+1,on);
   Q_EMIT set_transceiver (cached_rig_state_, ++transceiver_command_number_);
 }
 
@@ -5810,7 +5810,7 @@ void Configuration::impl::transceiver_ft4_mode (bool on)
   if (cached_rig_state_.ft4_mode() != on)
   {
     cached_rig_state_.ft4_mode (on);
-//    printf("%s(%0.1f) Configuration #:%d ft4_mode: %d\n",jtdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),jtdxtime_->GetOffset(),transceiver_command_number_+1,on);
+//    printf("%s(%0.1f) Configuration #:%d ft4_mode: %d\n",atdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),atdxtime_->GetOffset(),transceiver_command_number_+1,on);
     Q_EMIT set_transceiver (cached_rig_state_, ++transceiver_command_number_);
   }
 }
@@ -5822,7 +5822,7 @@ void Configuration::impl::transceiver_audio (bool on)
   if (cached_rig_state_.audio() != on)
   {
     cached_rig_state_.audio (on);
-//    printf("%s(%0.1f) Configuration #:%d audio: %d\n",jtdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),jtdxtime_->GetOffset(),transceiver_command_number_+1,on);
+//    printf("%s(%0.1f) Configuration #:%d audio: %d\n",atdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),atdxtime_->GetOffset(),transceiver_command_number_+1,on);
     Q_EMIT set_transceiver (cached_rig_state_, ++transceiver_command_number_);
   }
 }
@@ -5834,7 +5834,7 @@ void Configuration::impl::transceiver_tune (bool on)
   if (cached_rig_state_.tune() != on)
   {
     cached_rig_state_.tune (on);
-//    printf("%s(%0.1f) Configuration #:%d tune: %d\n",jtdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),jtdxtime_->GetOffset(),transceiver_command_number_+1,on);
+//    printf("%s(%0.1f) Configuration #:%d tune: %d\n",atdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),atdxtime_->GetOffset(),transceiver_command_number_+1,on);
     Q_EMIT set_transceiver (cached_rig_state_, ++transceiver_command_number_);
   }
 }
@@ -5845,7 +5845,7 @@ void Configuration::impl::transceiver_period (double period)
   set_cached_mode ();
   if (cached_rig_state_.period() != period)
   {
-//    printf("%s(%0.1f) Configuration #:%d period: %0.1f cached: %0.1f\n",jtdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),jtdxtime_->GetOffset(),transceiver_command_number_+1,period,cached_rig_state_.period());
+//    printf("%s(%0.1f) Configuration #:%d period: %0.1f cached: %0.1f\n",atdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),atdxtime_->GetOffset(),transceiver_command_number_+1,period,cached_rig_state_.period());
     cached_rig_state_.period (period);
     Q_EMIT set_transceiver (cached_rig_state_, ++transceiver_command_number_);
   }
@@ -5857,7 +5857,7 @@ void Configuration::impl::transceiver_blocksize (qint32 blocksize)
   set_cached_mode ();
   if (cached_rig_state_.blocksize() != blocksize)
   {
-//    printf("%s(%0.1f) Configuration #:%d blocksize: %d cached:%d\n",jtdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),jtdxtime_->GetOffset(),transceiver_command_number_+1,blocksize,cached_rig_state_.blocksize());
+//    printf("%s(%0.1f) Configuration #:%d blocksize: %d cached:%d\n",atdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),atdxtime_->GetOffset(),transceiver_command_number_+1,blocksize,cached_rig_state_.blocksize());
     cached_rig_state_.blocksize (blocksize);
     Q_EMIT set_transceiver (cached_rig_state_, ++transceiver_command_number_);
   }
@@ -5869,7 +5869,7 @@ void Configuration::impl::transceiver_spread (double spread)
   set_cached_mode ();
   if (cached_rig_state_.spread() != spread)
   {
-//    printf("%s(%0.1f) Configuration #:%d spread: %0.1f cached: %0.1f\n",jtdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),jtdxtime_->GetOffset(),transceiver_command_number_+1,spread,cached_rig_state_.spread());
+//    printf("%s(%0.1f) Configuration #:%d spread: %0.1f cached: %0.1f\n",atdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),atdxtime_->GetOffset(),transceiver_command_number_+1,spread,cached_rig_state_.spread());
     cached_rig_state_.spread (spread);
     Q_EMIT set_transceiver (cached_rig_state_, ++transceiver_command_number_);
   }
@@ -5881,7 +5881,7 @@ void Configuration::impl::transceiver_nsym (int nsym)
   set_cached_mode ();
   if (cached_rig_state_.nsym() != nsym)
   {
-//    printf("%s(%0.1f) Configuration #:%d nsym: %d cached:%d\n",jtdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),jtdxtime_->GetOffset(),transceiver_command_number_+1,nsym,cached_rig_state_.nsym());
+//    printf("%s(%0.1f) Configuration #:%d nsym: %d cached:%d\n",atdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),atdxtime_->GetOffset(),transceiver_command_number_+1,nsym,cached_rig_state_.nsym());
     cached_rig_state_.nsym (nsym);
     Q_EMIT set_transceiver (cached_rig_state_, ++transceiver_command_number_);
   }
@@ -5893,7 +5893,7 @@ void Configuration::impl::transceiver_trfrequency (double trfrequency)
   set_cached_mode ();
   if (cached_rig_state_.trfrequency() != trfrequency)
   {
-//    printf("%s(%0.1f) Configuration #:%d trfrequency: %0.1f cached: %0.1f\n",jtdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),jtdxtime_->GetOffset(),transceiver_command_number_+1,trfrequency,cached_rig_state_.trfrequency());
+//    printf("%s(%0.1f) Configuration #:%d trfrequency: %0.1f cached: %0.1f\n",atdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),atdxtime_->GetOffset(),transceiver_command_number_+1,trfrequency,cached_rig_state_.trfrequency());
     cached_rig_state_.trfrequency (trfrequency);
     Q_EMIT set_transceiver (cached_rig_state_, ++transceiver_command_number_);
   }
@@ -5905,7 +5905,7 @@ void Configuration::impl::transceiver_txvolume (double txvolume)
   set_cached_mode ();
   if (cached_rig_state_.volume() != txvolume)
   {
-//    printf("%s(%0.1f) Configuration #:%d txvolume: %0.1f cached: %0.1f\n",jtdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),jtdxtime_->GetOffset(),transceiver_command_number_+1,txvolume,cached_rig_state_.volume());
+//    printf("%s(%0.1f) Configuration #:%d txvolume: %0.1f cached: %0.1f\n",atdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),atdxtime_->GetOffset(),transceiver_command_number_+1,txvolume,cached_rig_state_.volume());
     cached_rig_state_.volume (txvolume);
     Q_EMIT set_transceiver (cached_rig_state_, ++transceiver_command_number_);
   }
@@ -5925,10 +5925,10 @@ void Configuration::impl::transceiver_modulator_start (unsigned symbolslength, d
     cached_rig_state_.synchronize (synchronize);
     cached_rig_state_.dbsnr (dbsnr);
     cached_rig_state_.trperiod (trperiod);
-//    printf("%s(%0.1f) Configuration #:%d modulator_start: symbolslength=%d framespersymbol=%0.1f frequency=%0.1f tonespacing=%0.1f synchronize= %d dbsnr=%0.1f trperiod=%0.1f\n",jtdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),jtdxtime_->GetOffset(),transceiver_command_number_+1,symbolslength,framespersymbol,frequency,tonespacing,synchronize,dbsnr,trperiod);
+//    printf("%s(%0.1f) Configuration #:%d modulator_start: symbolslength=%d framespersymbol=%0.1f frequency=%0.1f tonespacing=%0.1f synchronize= %d dbsnr=%0.1f trperiod=%0.1f\n",atdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),atdxtime_->GetOffset(),transceiver_command_number_+1,symbolslength,framespersymbol,frequency,tonespacing,synchronize,dbsnr,trperiod);
     Q_EMIT set_transceiver (cached_rig_state_, ++transceiver_command_number_);
   }
-//  else printf("%s(%0.1f) Configuration modulator_start: WAS ALLREADY RUNNING\n",jtdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),jtdxtime_->GetOffset());
+//  else printf("%s(%0.1f) Configuration modulator_start: WAS ALLREADY RUNNING\n",atdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),atdxtime_->GetOffset());
 }
 
 void Configuration::impl::transceiver_modulator_stop (bool on)
@@ -5939,15 +5939,15 @@ void Configuration::impl::transceiver_modulator_stop (bool on)
   {
     cached_rig_state_.tx_audio (false);
     cached_rig_state_.quick (on);
-//    printf("%s(%0.1f) Configuration #:%d modulator_stop: quick=%d\n",jtdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),jtdxtime_->GetOffset(),transceiver_command_number_+1,on);
+//    printf("%s(%0.1f) Configuration #:%d modulator_stop: quick=%d\n",atdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),atdxtime_->GetOffset(),transceiver_command_number_+1,on);
     Q_EMIT set_transceiver (cached_rig_state_, ++transceiver_command_number_);
   }
-//  else printf("%s(%0.1f) Configuration modulator_stop: WAS NOT RUNNING\n",jtdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),jtdxtime_->GetOffset());
+//  else printf("%s(%0.1f) Configuration modulator_stop: WAS NOT RUNNING\n",atdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),atdxtime_->GetOffset());
 }
 
 void Configuration::impl::sync_transceiver (bool /*force_signal*/)
 {
-//  printf("%s(%0.1f) Configuration sync force: NULL\n",jtdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),jtdxtime_->GetOffset());
+//  printf("%s(%0.1f) Configuration sync force: NULL\n",atdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),atdxtime_->GetOffset());
   // pass this on as cache must be ignored
   // Q_EMIT sync (force_signal);
 }
@@ -5992,7 +5992,7 @@ void Configuration::impl::handle_transceiver_update (TransceiverState const& sta
     }
   else
     {
-//      printf("%s(%0.1f) Configuration #:%d %d transceiver_update close rig\n",jtdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),jtdxtime_->GetOffset(),sequence_number,transceiver_command_number_);
+//      printf("%s(%0.1f) Configuration #:%d %d transceiver_update close rig\n",atdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),atdxtime_->GetOffset(),sequence_number,transceiver_command_number_);
       if (sequence_number == transceiver_command_number_) close_rig ();
     }
 
@@ -6019,7 +6019,7 @@ void Configuration::impl::handle_transceiver_failure (QString const& reason)
   qDebug () << "Configuration::handle_transceiver_failure: reason:" << reason;
 #endif
 
-//  printf("%s(%0.1f) Configuration transceiver_failure close rig\n",jtdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),jtdxtime_->GetOffset());
+//  printf("%s(%0.1f) Configuration transceiver_failure close rig\n",atdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),atdxtime_->GetOffset());
   close_rig ();
   ui_->test_PTT_push_button->setChecked (false);
 
@@ -6050,7 +6050,7 @@ void Configuration::impl::close_rig ()
         }
       rig_connections_.clear ();
       rig_active_ = false;
-//      printf("%s(%0.1f) Configuration running rig closed\n",jtdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),jtdxtime_->GetOffset());
+//      printf("%s(%0.1f) Configuration running rig closed\n",atdxtime_->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),atdxtime_->GetOffset());
     }
 }
 

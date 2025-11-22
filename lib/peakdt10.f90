@@ -1,5 +1,5 @@
 ! This source code file was last time modified by Igor UA3DJY on June 5th, 2017
-! All changes are shown in the patch file coming together with the full JTDX source code.
+! All changes are shown in the patch file coming together with the full atdx source code.
 
 subroutine peakdt10(c2,nsps8,nspsd,c3,xdt,tryhint,xdtrxf)
 

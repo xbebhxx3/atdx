@@ -1,5 +1,5 @@
 ! This source code file was last time modified by Igor UA3DJY on July 5th, 2017
-! All changes are shown in the patch file coming together with the full JTDX source code.
+! All changes are shown in the patch file coming together with the full atdx source code.
 
 subroutine softsym9s(npts8,nsps8,newdat,fpk,syncpk,snrdb,xdt,        &
      freq,drift,a3,schk,i1SoftSymbols,mrs,mrs2,s3,tryhint,xdtrxf)

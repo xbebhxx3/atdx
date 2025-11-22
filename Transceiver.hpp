@@ -5,7 +5,7 @@
 
 #include "qt_helpers.hpp"
 #include "Radio.hpp"
-#include "JTDXDateTime.h"
+#include "atdxDateTime.h"
 
 class QString;
 
@@ -209,7 +209,7 @@ public:
                            unsigned sequence_number) noexcept = 0;
 
   // Connect and disconnect.
-  Q_SLOT virtual void start (unsigned sequence_number,JTDXDateTime* jtdxtime) noexcept = 0;
+  Q_SLOT virtual void start (unsigned sequence_number,atdxDateTime* atdxtime) noexcept = 0;
   Q_SLOT virtual void stop () noexcept = 0;
 
   //

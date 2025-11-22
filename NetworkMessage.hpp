@@ -4,7 +4,7 @@
 #define NETWORK_MESSAGE_HPP__
 
 /*
- * JTDX Message Formats
+ * atdx Message Formats
  * ======================
  *
  * All messages are written or  read using the QDataStream derivatives
@@ -194,8 +194,8 @@
  *                         Message                utf8
  *
  *      In order for a server  to provide a useful cooperative service
- *      to JTDX it  is possible for it to initiate  a  QSO  by sending
- *      this message to a client. JTDX filters this   message and only
+ *      to atdx it  is possible for it to initiate  a  QSO  by sending
+ *      this message to a client. atdx filters this   message and only
  *      acts upon it  if the message exactly describes a prior decode.
  *      The action taken is  exactly  equivalent  to  the user  double
  *      clicking the message in the "Band activity" window. The intent
@@ -223,7 +223,7 @@
  *                         My grid                utf8
  *
  *      The  QSO logged  message is  sent  to the  server(s) when  the
- *      JTDX  user  accepts the "Log  QSO" dialog by clicking the "OK"
+ *      atdx  user  accepts the "Log  QSO" dialog by clicking the "OK"
  *      button.
  *
  *
@@ -314,15 +314,15 @@
  *                         ADIF text              utf8
  *
  *      The  logged ADIF  message is  sent to  the server(s)  when the
- *      JTDX user accepts the "Log  QSO" dialog by clicking the "OK"
+ *      atdx user accepts the "Log  QSO" dialog by clicking the "OK"
  *      button. The  "ADIF text" field  consists of a valid  ADIF file
- *      such that  the JTDX  UDP header information  is encapsulated
+ *      such that  the atdx  UDP header information  is encapsulated
  *      into a valid ADIF header. E.g.:
  *
  *          <magic-number><schema-number><type><id><32-bit-count>  # binary encoded fields
  *          # the remainder is the contents of the ADIF text field
  *          <adif_ver:5>3.0.7
- *          <programid:4>JTDX
+ *          <programid:4>atdx
  *          <EOH>
  *          ADIF log data fields ...<EOR>
  *
@@ -334,7 +334,7 @@
  *                         Id (unique key)        utf8
  *                         TX delta frequency     quint32
  *
- *      Setting TX delta frequency in JTDX.  Received  value  will  be
+ *      Setting TX delta frequency in atdx.  Received  value  will  be
  *      checked against widegraph frequency range,  it will be ignored
  *      if it does not fit there.
  * 
@@ -347,7 +347,7 @@
  *
  *      The  triggerCQ   message  is  dedicated  to  set CQ direction,
  *      TX period  and  optionally  trigger  CQ  message  transmission 
- *      in  JTDX  from  external  software    through    the   network
+ *      in  atdx  from  external  software    through    the   network
  *      connection.  Directional  CQ  is  also  being  supported where 
  *      direction is two-char combination in the range AA..ZZ.
  *      TX period is equivalent to TX first in the Status UDP message,

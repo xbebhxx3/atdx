@@ -1,5 +1,5 @@
 ! This source code file was last time modified by Igor Chernikov UA3DJY on May 25th, 2016.
-! All changes are shown in the file 15_6.patch coming together with the full JTDX source code.
+! All changes are shown in the file 15_6.patch coming together with the full atdx source code.
 
 subroutine ccf65(ss,nhsym,ssmax,sync1,dt1,flipk,syncshort,snr2,dt2)
 

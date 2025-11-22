@@ -37,7 +37,7 @@ public:
             unsigned sequence_number) noexcept override;
 
   // forward everything else to wrapped Transceiver
-  void start (unsigned sequence_number, JTDXDateTime* jtdxtime) noexcept override {wrapped_->start (sequence_number,jtdxtime);}
+  void start (unsigned sequence_number, atdxDateTime* atdxtime) noexcept override {wrapped_->start (sequence_number,atdxtime);}
   void stop () noexcept override {wrapped_->stop ();}
 
 private:
