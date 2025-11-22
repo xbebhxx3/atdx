@@ -1725,7 +1725,7 @@ void MainWindow::autoStopTx(QString reason)
 {
 //prevent AF RX frequency jumps since QSO is finished and prevent unexpected Halt Tx in autologging mode
 //  if(m_config.clear_DX () || m_config.autolog()) clearDX ();
-  if(m_enableTx || m_transmitting || m_btxok || g_iptt==1) haltTx(reason);
+  //if(m_enableTx || m_transmitting || m_btxok || g_iptt==1) haltTx(reason);// 禁用自动停止发射
 //prevent any possible sequence breaking with this callsign at the next QSO attempt
   if(m_skipTx1 && reason.endsWith ("counter triggered ") && (m_ntx==2 || m_QSOProgress==REPORT)) m_qsoHistory.remove(m_hisCall);
 //prevent AF RX frequency jumps since QSO is finished and prevent unexpected Halt Tx in autologging mode
