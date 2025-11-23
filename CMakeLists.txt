@@ -1301,7 +1301,7 @@ install (PROGRAMS
   )
 
 install (FILES
-  README
+  README.md
   COPYING
   AUTHORS
   THANKS
