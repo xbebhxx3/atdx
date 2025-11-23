@@ -1,6 +1,16 @@
-# we need auto TX!!!
+# atdx:auto-jtdx (we need auto TX!!!)
 ### how to Compile
-    sudo apt install -y cmake gfortran-mingw-w64-x86-64-posix libgfortran-14-dev gfortran-x86-64-linux-gnu libfftw3-dev libusb-dev build-essential cmake git pkg-config qtbase5-dev qtchooser qttools5-dev qttools5-dev-tools qtmultimedia5-dev libqt5serialport5-dev libqt5svg5-dev libhamlib-dev libusb-dev libusb-1.0-0-dev portaudio19-dev libsamplerate0-dev libudev-dev libcurl4-openssl-dev libasound2-dev libboost-all-dev
+    sudo apt update
+    sudo apt install -y \
+        build-essential cmake git pkg-config \
+        qtbase5-dev qttools5-dev qttools5-dev-tools qtmultimedia5-dev \
+        libqt5serialport5-dev libqt5svg5-dev \
+        gfortran libgfortran-14-dev \
+        libfftw3-dev libusb-1.0-0-dev libhamlib-dev \
+        portaudio19-dev libsamplerate0-dev libasound2-dev \
+        libudev-dev libcurl4-openssl-dev \
+        libboost-all-dev
+
     mkdir build
     cd build
     cmake ..
