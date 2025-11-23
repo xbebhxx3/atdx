@@ -1,0 +1,109 @@
+name: ATDX Multi-Platform Build
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # ---------------- WINDOWS ----------------
+          - { name: "win-x86",    os: windows-latest, qt_arch: "win32_msvc2019", qt_platform: "windows", msvc_arch: "x86" }
+          - { name: "win-x64",    os: windows-latest, qt_arch: "win64_msvc2019_64", qt_platform: "windows", msvc_arch: "x64" }
+          - { name: "win-arm64",  os: windows-latest, qt_arch: "win64_msvc2019_arm64", qt_platform: "windows", msvc_arch: "arm64" }
+
+          # ---------------- LINUX NATIVE ----------------
+          - { name: "linux-x64", os: ubuntu-22.04, linux_arch: "x86_64" }
+          - { name: "linux-x86", os: ubuntu-22.04, linux_arch: "i386" }
+
+          # ---------------- LINUX ARM CROSS ----------------
+          - { name: "linux-armv7", os: ubuntu-22.04, linux_arch: "armhf" }
+          - { name: "linux-arm64", os: ubuntu-22.04, linux_arch: "aarch64" }
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    # ================= WINDOWS QT INSTALL =================
+    - name: Install Qt (Windows only)
+      if: matrix.qt_platform == 'windows'
+      run: |
+        pip install aqtinstall
+        aqt install-qt windows desktop 5.15.2 ${{ matrix.qt_arch }} -O C:\Qt
+        echo "QT_DIR=C:\Qt\5.15.2\${{ matrix.qt_arch }}" >> $GITHUB_ENV
+
+    # ================= WINDOWS BUILD =================
+    - name: Build Windows
+      if: matrix.qt_platform == 'windows'
+      run: |
+        cmake -B build -G "NMake Makefiles" ^
+          -DCMAKE_PREFIX_PATH="%QT_DIR%" ^
+          -DCPACK_GENERATOR=ZIP
+        cmake --build build --config Release
+        cpack --config build/CPackConfig.cmake -B dist
+
+    # ================= LINUX DEPENDENCIES =================
+    - name: Install Linux build deps
+      if: startsWith(matrix.os, 'ubuntu')
+      run: |
+        sudo dpkg --add-architecture i386 || true
+        sudo apt update
+        sudo apt install -y \
+            build-essential cmake git pkg-config \
+            qtbase5-dev qttools5-dev qttools5-dev-tools qtmultimedia5-dev \
+            libqt5serialport5-dev libqt5svg5-dev \
+            gfortran libgfortran-14-dev \
+            libfftw3-dev libusb-1.0-0-dev libhamlib-dev \
+            portaudio19-dev libsamplerate0-dev libasound2-dev \
+            libudev-dev libcurl4-openssl-dev \
+            libboost-all-dev \
+            asciidoctor
+
+        # 32-bit host
+        if [ "${{ matrix.linux_arch }}" = "i386" ]; then
+          sudo apt install -y gcc-multilib g++-multilib
+        fi
+
+        # ARM cross compilers
+        if [ "${{ matrix.linux_arch }}" = "armhf" ]; then
+          sudo apt install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+        fi
+
+        if [ "${{ matrix.linux_arch }}" = "aarch64" ]; then
+          sudo apt install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+        fi
+
+    # ================= LINUX BUILD =================
+    - name: Build Linux
+      if: startsWith(matrix.os, 'ubuntu')
+      run: |
+        if [ "${{ matrix.linux_arch }}" = "i386" ]; then
+          export CMAKE_C_COMPILER="gcc -m32"
+          export CMAKE_CXX_COMPILER="g++ -m32"
+        fi
+        
+        if [ "${{ matrix.linux_arch }}" = "armhf" ]; then
+          export CC=arm-linux-gnueabihf-gcc
+          export CXX=arm-linux-gnueabihf-g++
+        fi
+
+        if [ "${{ matrix.linux_arch }}" = "aarch64" ]; then
+          export CC=aarch64-linux-gnu-gcc
+          export CXX=aarch64-linux-gnu-g++
+        fi
+
+        cmake -B build -DWSJT_SKIP_MANPAGES=ON
+        cmake --build build -j$(nproc)
+        cpack --config build/CPackConfig.cmake -B dist
+
+    # ================= UPLOAD =================
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.name }}
+        path: dist/
