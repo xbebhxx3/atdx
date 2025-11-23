@@ -1725,7 +1725,7 @@ void MainWindow::autoStopTx(QString reason)
 {
 //prevent AF RX frequency jumps since QSO is finished and prevent unexpected Halt Tx in autologging mode
 //  if(m_config.clear_DX () || m_config.autolog()) clearDX ();
-  //if(m_enableTx || m_transmitting || m_btxok || g_iptt==1) haltTx(reason);// 禁用自动停止发射
+  if(m_enableTx || m_transmitting || m_btxok || g_iptt==1) returnToCQ(reason);//haltTx(reason);// 禁用自动停止发射
 //prevent any possible sequence breaking with this callsign at the next QSO attempt
   if(m_skipTx1 && reason.endsWith ("counter triggered ") && (m_ntx==2 || m_QSOProgress==REPORT)) m_qsoHistory.remove(m_hisCall);
 //prevent AF RX frequency jumps since QSO is finished and prevent unexpected Halt Tx in autologging mode
@@ -2809,7 +2809,7 @@ void MainWindow::on_pbSpotDXCall_clicked ()
 
 void MainWindow::msgBox(QString t) { msgBox0.setText(t); msgBox0.translate_buttons(); msgBox0.exec(); }
 void MainWindow::on_actionatdx_Web_Site_triggered() { m_manual.display_html_url (QUrl {PROJECT_MANUAL_DIRECTORY_URL}, PROJECT_MANUAL); }
-void MainWindow::on_actionatdx_Forum_triggered() { m_manual.display_html_url (QUrl {"https://atdx.freeforums.net/"}, ""); }
+void MainWindow::on_actionatdx_Forum_triggered() { m_manual.display_html_url (QUrl {"https://jtdx.freeforums.net/"}, ""); }
 
 /*Display local copy of manual
 void MainWindow::on_actionLocal_User_Guide_triggered()
@@ -3464,10 +3464,9 @@ void MainWindow::process_Auto()
     if (m_houndMode ) { //WSJT-X Fox will drop QSO if R+Report from Hound is not decoded after three attempts 
       if (m_status == QsoHistory::SRREPORT || m_status == QsoHistory::RREPORT) {
         if(count > 3) {
-          haltTx("DXpQSO failed after three TX of R+REPORT message ");
+          //haltTx("DXpQSO failed after three TX of R+REPORT message ");
           count = m_qsoHistory.reset_count(hisCall,QsoHistory::RCQ);
-          ui->TxFreqSpinBox->setValue (m_lastCallingFreq);
-          m_status = QsoHistory::RCQ;
+          returnToCQ(" returning to CQ after three TX of R+REPORT message ");
          } else if (m_houndTXfreqJumps && rx > 199 && rx < 1000) {
           if (count == 1) {
              ui->TxFreqSpinBox->setValue (rx);
@@ -3640,7 +3639,11 @@ void MainWindow::process_Auto()
             m_logqso73=true;
             logQSOTimer.start (0);
           }
-          //if(m_enableTx || m_transmitting || m_btxok || g_iptt==1) haltTx("end of DXpedition QSO ");
+          if(m_enableTx || m_transmitting || m_btxok || g_iptt==1){
+            returnToCQ("end of DXpedition QSO ");
+          //haltTx("end of DXpedition QSO ");
+          }
+          
         }
         break;
       }
@@ -3945,7 +3948,8 @@ void MainWindow::readFromStdout()                             //readFromStdout
       } else if (!deCall.isEmpty() && Radio::base_callsign (deCall) == Radio::base_callsign (m_hisCall) && decodedtextmsg.left(3) != "CQ " && decodedtextmsg.left(3) != "DE " && decodedtextmsg.left(4) != "QRZ " && !decodedtextmsg.contains(" 73") && !decodedtextmsg.contains(" RR73") && !decodedtextmsg.contains(" RRR")) {
         m_used_freq = decodedtext.frequencyOffset();
          if (m_enableTx && !m_reply_me && !m_houndMode && (abs(m_used_freq - ui->TxFreqSpinBox->value ()) < m_nguardfreq || m_config.halttxreplyother ())) { 
-           haltTx("readFromStdout, not owner of the frequency or reply to other ");/* if(m_skipTx1) m_qsoHistory.remove(m_hisCall); */
+           //haltTx("readFromStdout, not owner of the frequency or reply to other ");/* if(m_skipTx1) m_qsoHistory.remove(m_hisCall); */
+          returnToCQ("readFromStdout, not owner of the frequency or reply to other ");
          }
       }
 
@@ -8075,4 +8079,14 @@ void MainWindow::dynamicButtonsInit()
     else if(height > 475 && height <= 500) { ui->bypassButton->show(); ui->singleQSOButton->show(); ui->AnsB4Button->show(); ui->stopButton->hide(); }
     else if(height > 500) { ui->bypassButton->show(); ui->singleQSOButton->show(); ui->AnsB4Button->show(); ui->stopButton->show(); }
   }
+}
+
+void MainWindow::returnToCQ(QString reason){
+  m_qsoHistory.remove(m_hisCall); 
+  m_hisCall.clear();
+  m_hisGrid.clear();
+  m_status = QsoHistory::RCQ;
+  ui->TxFreqSpinBox->setValue(m_lastCallingFreq);
+  if(m_config.clear_DX ()) clearDX (reason);
+  writeToALLTXT("returnToCQ:" + reason);
 }
