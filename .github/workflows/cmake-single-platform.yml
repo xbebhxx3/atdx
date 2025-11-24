@@ -188,8 +188,8 @@ jobs:
       with:
         name: ${{ matrix.name }}
         path: |
-        dist/*.deb
-        dist/*.rpm
+          dist/*.deb
+          dist/*.rpm
   
     - name: Upload windows
       if: startsWith(matrix.os, 'ubuntu')
