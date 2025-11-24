@@ -94,7 +94,7 @@ jobs:
             libudev-dev libcurl4-openssl-dev \
             libboost-all-dev asciidoctor \
             libhamlib-dev \
-            hamlib-utils \
+            libhamlib-utils \
 
         if [ "${{ matrix.linux_arch }}" = "i386" ]; then
           sudo apt install -y gcc-multilib g++-multilib libgfortran-11-dev:i386 libfftw3-dev:i386 gfortran-multilib libgfortran-11-dev:i386 libgfortran-11-dev-i386-cross
