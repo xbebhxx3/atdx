@@ -107,6 +107,7 @@ jobs:
         deb [arch=armhf,arm64] http://ports.ubuntu.com/ jammy-security main restricted universe multiverse
         deb [arch=armhf,arm64] http://ports.ubuntu.com/ jammy-backports main restricted universe multiverse
         EOF
+
         sudo dpkg --add-architecture i386 || true
         sudo dpkg --add-architecture armhf || true
         sudo dpkg --add-architecture arm64 || true
@@ -163,7 +164,7 @@ jobs:
             libudev-dev:arm64 libcurl4-openssl-dev:arm64 \
             libboost-all-dev:arm64 asciidoctor:arm64 \
             libhamlib-dev:arm64 \
-            libhamlib-utils:arm64 \
+            libhamlib-utils:arm64
         fi
 
     # ================= LINUX BUILD =================
