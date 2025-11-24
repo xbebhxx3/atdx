@@ -55,6 +55,10 @@ jobs:
         pip install aqtinstall
         aqt install-qt windows desktop 5.15.2 ${{ matrix.qt_arch }} -O C:\Qt
         echo "QT_DIR=C:\Qt\5.15.2\${{ matrix.qt_arch }}" >> $GITHUB_ENV
+        git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
+        C:\vcpkg\bootstrap-vcpkg.bat
+        C:\vcpkg\vcpkg.exe install boost:x64-windows qt5-base qt5-tools qt5-multimedia qt5-serialport qt5-svg qt5-websockets portaudio libusb
+        echo "VCPKG_ROOT=C:\vcpkg" >> $GITHUB_ENV
 
     - name: Setup MSVC + Ninja
       if: matrix.qt_platform == 'windows'
