@@ -62,7 +62,7 @@ jobs:
 
     - name: Install Ninja
       if: matrix.qt_platform == 'windows'
-      uses: marcelbuesing/setup-ninja@v1
+      uses: ashutoshvarma/setup-ninja@master
     # ================= WINDOWS BUILD =================
     - name: Build Windows
       if: matrix.qt_platform == 'windows'
