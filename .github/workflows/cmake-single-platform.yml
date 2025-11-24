@@ -63,6 +63,7 @@ jobs:
     - name: Install Ninja
       if: matrix.qt_platform == 'windows'
       uses: ashutoshvarma/setup-ninja@master
+
     # ================= WINDOWS BUILD =================
     - name: Build Windows
       if: matrix.qt_platform == 'windows'
@@ -72,6 +73,7 @@ jobs:
           -DCMAKE_PREFIX_PATH="$env:QT_DIR" `
           -DCPACK_GENERATOR=ZIP `
           -DPROJECT_VERSION=$env:VERSION
+          -DWSJT_SKIP_OMNIRIG=ON
 
         cmake --build build --config Release
         cpack --config build/CPackConfig.cmake -B dist
@@ -90,18 +92,19 @@ jobs:
             libfftw3-dev libusb-1.0-0-dev libhamlib-dev \
             portaudio19-dev libsamplerate0-dev libasound2-dev \
             libudev-dev libcurl4-openssl-dev \
-            libboost-all-dev asciidoctor
+            libboost-all-dev asciidoctor \
+            libhamlib-dev
 
         if [ "${{ matrix.linux_arch }}" = "i386" ]; then
-          sudo apt install -y gcc-multilib g++-multilib
+          sudo apt install -y gcc-multilib g++-multilib libgfortran-11-dev:i386 gfortran-multilib libgfortran-11-dev:i386 libgfortran-11-dev-i386-cross
         fi
 
         if [ "${{ matrix.linux_arch }}" = "armhf" ]; then
-          sudo apt install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+          sudo apt install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf gfortran-arm-linux-gnueabihf libgfortran-11-dev-armhf-cross
         fi
 
         if [ "${{ matrix.linux_arch }}" = "aarch64" ]; then
-          sudo apt install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+          sudo apt install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libgfortran-11-dev-arm64-cross
         fi
 
     # ================= LINUX BUILD =================
@@ -112,14 +115,18 @@ jobs:
           export CFLAGS="-m32"
           export CXXFLAGS="-m32"
           export LDFLAGS="-m32"
+          export FC=gfortran
+          export FFLAGS="-m32"
         fi
         if [ "${{ matrix.linux_arch }}" = "armhf" ]; then
           export CC=arm-linux-gnueabihf-gcc
           export CXX=arm-linux-gnueabihf-g++
+          export FC=arm-linux-gnueabihf-gfortran
         fi
         if [ "${{ matrix.linux_arch }}" = "aarch64" ]; then
           export CC=aarch64-linux-gnu-gcc
           export CXX=aarch64-linux-gnu-g++
+          export FC=aarch64-linux-gnu-gfortran
         fi
 
         cmake -B build -DWSJT_SKIP_MANPAGES=ON -DPROJECT_VERSION=$VERSION
