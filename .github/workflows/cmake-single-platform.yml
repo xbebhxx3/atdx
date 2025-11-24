@@ -72,7 +72,7 @@ jobs:
         cmake -B build -G "Ninja" `
           -DCMAKE_PREFIX_PATH="$env:QT_DIR" `
           -DCPACK_GENERATOR=ZIP `
-          -DPROJECT_VERSION=$env:VERSION
+          -DPROJECT_VERSION=$env:VERSION `
           -DWSJT_SKIP_OMNIRIG=ON
 
         cmake --build build --config Release
@@ -93,10 +93,11 @@ jobs:
             portaudio19-dev libsamplerate0-dev libasound2-dev \
             libudev-dev libcurl4-openssl-dev \
             libboost-all-dev asciidoctor \
-            libhamlib-dev
+            libhamlib-dev \
+            hamlib-utils \
 
         if [ "${{ matrix.linux_arch }}" = "i386" ]; then
-          sudo apt install -y gcc-multilib g++-multilib libgfortran-11-dev:i386 gfortran-multilib libgfortran-11-dev:i386 libgfortran-11-dev-i386-cross
+          sudo apt install -y gcc-multilib g++-multilib libgfortran-11-dev:i386 libfftw3-dev:i386 gfortran-multilib libgfortran-11-dev:i386 libgfortran-11-dev-i386-cross
         fi
 
         if [ "${{ matrix.linux_arch }}" = "armhf" ]; then
@@ -104,7 +105,7 @@ jobs:
         fi
 
         if [ "${{ matrix.linux_arch }}" = "aarch64" ]; then
-          sudo apt install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libgfortran-11-dev-arm64-cross
+          sudo apt install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libgfortran-11-dev-arm64-cross gfortran-aarch64-linux-gnu
         fi
 
     # ================= LINUX BUILD =================
@@ -112,11 +113,13 @@ jobs:
       if: startsWith(matrix.os, 'ubuntu')
       run: |
         if [ "${{ matrix.linux_arch }}" = "i386" ]; then
+          export CC=gcc
+          export CXX=g++
+          export FC=gfortran
           export CFLAGS="-m32"
           export CXXFLAGS="-m32"
-          export LDFLAGS="-m32"
-          export FC=gfortran
           export FFLAGS="-m32"
+          export LDFLAGS="-m32"
         fi
         if [ "${{ matrix.linux_arch }}" = "armhf" ]; then
           export CC=arm-linux-gnueabihf-gcc
