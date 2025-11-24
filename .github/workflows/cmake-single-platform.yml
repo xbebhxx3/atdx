@@ -66,7 +66,10 @@ jobs:
 
     - name: Install Ninja
       if: matrix.qt_platform == 'windows'
-      uses: ashutoshvarma/setup-ninja@master
+      run: |
+        Invoke-WebRequest -Uri https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-win.zip -OutFile ninja.zip
+        Expand-Archive ninja.zip -DestinationPath $Env:USERPROFILE\ninja
+        setx PATH "$Env:USERPROFILE\ninja;$Env:PATH"
 
     # ================= WINDOWS BUILD =================
     - name: Build Windows
@@ -87,6 +90,8 @@ jobs:
       if: startsWith(matrix.os, 'ubuntu')
       run: |
         sudo dpkg --add-architecture i386 || true
+        sudo dpkg --add-architecture armhf || true
+        sudo dpkg --add-architecture arm64 || true
         sudo apt update
         sudo apt install -y \
             build-essential cmake git pkg-config \
@@ -98,18 +103,49 @@ jobs:
             libudev-dev libcurl4-openssl-dev \
             libboost-all-dev asciidoctor \
             libhamlib-dev \
-            libhamlib-utils \
+            libhamlib-utils
 
         if [ "${{ matrix.linux_arch }}" = "i386" ]; then
-          sudo apt install -y gcc-multilib g++-multilib libgfortran-11-dev:i386 libfftw3-dev:i386 gfortran-multilib libgfortran-11-dev:i386 libgfortran-11-dev-i386-cross
+          sudo apt install -y gcc-multilib g++-multilib gfortran-multilib libgfortran-11-dev-i386-cross
+          sudo apt install -y \
+            build-essential:i386 cmake:i386 git pkg-config \
+            qtbase5-dev:i386 qttools5-dev:i386 qttools5-dev-tools:i386 qtmultimedia5-dev:i386 \
+            libqt5serialport5-dev:i386 libqt5svg5-dev:i386 libqt5websockets5-dev:i386 \
+            gfortran:i386 libgfortran-11-dev:i386 \
+            libfftw3-dev:i386 libusb-1.0-0-dev:i386 libhamlib-dev:i386 \
+            portaudio19-dev:i386 libsamplerate0-dev:i386 libasound2-dev:i386 \
+            libudev-dev:i386 libcurl4-openssl-dev:i386 \
+            libboost-all-dev:i386 asciidoctor:i386 \
+            libhamlib-dev:i386 \
+            libhamlib-utils:i386
         fi
 
         if [ "${{ matrix.linux_arch }}" = "armhf" ]; then
           sudo apt install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf gfortran-arm-linux-gnueabihf libgfortran-11-dev-armhf-cross
+          sudo apt install -y \
+            qtbase5-dev:armhf qttools5-dev:armhf qttools5-dev-tools:armhf qtmultimedia5-dev:armhf \
+            libqt5serialport5-dev:armhf libqt5svg5-dev:armhf libqt5websockets5-dev:armhf \
+            gfortran:armhf libgfortran-11-dev:armhf \
+            libfftw3-dev:armhf libusb-1.0-0-dev:armhf libhamlib-dev:armhf \
+            portaudio19-dev:armhf libsamplerate0-dev:armhf libasound2-dev:armhf \
+            libudev-dev:armhf libcurl4-openssl-dev:armhf \
+            libboost-all-dev:armhf asciidoctor:armhf \
+            libhamlib-dev:armhf \
+            libhamlib-utils:armhf
         fi
 
         if [ "${{ matrix.linux_arch }}" = "aarch64" ]; then
           sudo apt install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libgfortran-11-dev-arm64-cross gfortran-aarch64-linux-gnu
+          sudo apt install -y \
+            qtbase5-dev:arm64 qttools5-dev:arm64 qttools5-dev-tools:arm64 qtmultimedia5-dev:arm64 \
+            libqt5serialport5-dev:arm64 libqt5svg5-dev:arm64 libqt5websockets5-dev:arm64 \
+            gfortran:arm64 libgfortran-11-dev:arm64 \
+            libfftw3-dev:arm64 libusb-1.0-0-dev:arm64 libhamlib-dev:arm64 \
+            portaudio19-dev:arm64 libsamplerate0-dev:arm64 libasound2-dev:arm64 \
+            libudev-dev:arm64 libcurl4-openssl-dev:arm64 \
+            libboost-all-dev:arm64 asciidoctor:arm64 \
+            libhamlib-dev:arm64 \
+            libhamlib-utils:arm64 \
         fi
 
     # ================= LINUX BUILD =================
