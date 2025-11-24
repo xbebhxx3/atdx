@@ -95,9 +95,9 @@ jobs:
       if: startsWith(matrix.os, 'ubuntu')
       run: |
         cat <<EOF | sudo tee /etc/apt/sources.list.d/000-ports.list
-        deb [armhf,arm64] http://ports.ubuntu.com/ jammy main restricted universe multiverse
-        deb [armhf,arm64] http://ports.ubuntu.com/ jammy-updates main restricted universe multiverse
-        deb [armhf,arm64] http://ports.ubuntu.com/ jammy-security main restricted universe multiverse
+        deb [arch=armhf,arm64] http://ports.ubuntu.com/ jammy main restricted universe multiverse
+        deb [arch=armhf,arm64] http://ports.ubuntu.com/ jammy-updates main restricted universe multiverse
+        deb [arch=armhf,arm64] http://ports.ubuntu.com/ jammy-security main restricted universe multiverse
         EOF
         sudo dpkg --add-architecture i386 || true
         sudo dpkg --add-architecture armhf || true
