@@ -94,7 +94,16 @@ jobs:
     - name: Install Linux build deps
       if: startsWith(matrix.os, 'ubuntu')
       run: |
-        sudo dpkg --add-architecture i386 || true
+        # For armhf
+        echo "deb [arch=armhf] http://ports.ubuntu.com/ jammy main restricted universe multiverse" | sudo tee /etc/apt/sources.list.d/armhf.list
+        echo "deb [arch=armhf] http://ports.ubuntu.com/ jammy-updates main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/armhf.list
+        echo "deb [arch=armhf] http://ports.ubuntu.com/ jammy-security main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/armhf.list
+
+        # For arm64
+        echo "deb [arch=arm64] http://ports.ubuntu.com/ jammy main restricted universe multiverse" | sudo tee /etc/apt/sources.list.d/arm64.list
+        echo "deb [arch=arm64] http://ports.ubuntu.com/ jammy-updates main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/arm64.list
+        echo "deb [arch=arm64] http://ports.ubuntu.com/ jammy-security main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/arm64.list
+                sudo dpkg --add-architecture i386 || true
         sudo dpkg --add-architecture armhf || true
         sudo dpkg --add-architecture arm64 || true
         sudo apt update
