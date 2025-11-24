@@ -56,12 +56,17 @@ jobs:
         aqt install-qt windows desktop 5.15.2 ${{ matrix.qt_arch }} -O C:\Qt
         echo "QT_DIR=C:\Qt\5.15.2\${{ matrix.qt_arch }}" >> $GITHUB_ENV
 
+    - name: Setup MSVC + Ninja
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Install Ninja
+      uses: ashutoshvarma/setup-ninja@v1
     # ================= WINDOWS BUILD =================
     - name: Build Windows
       if: matrix.qt_platform == 'windows'
       shell: pwsh
       run: |
-        cmake -B build -G "NMake Makefiles" `
+        cmake -B build -G "Ninja" `
           -DCMAKE_PREFIX_PATH="$env:QT_DIR" `
           -DCPACK_GENERATOR=ZIP `
           -DPROJECT_VERSION=$env:VERSION
