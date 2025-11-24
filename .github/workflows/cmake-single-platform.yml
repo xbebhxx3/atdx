@@ -2,6 +2,8 @@ name: ATDX Multi-Platform Build
 
 on:
   push:
+    tags:
+      - "v*"     # 仅在 tag 触发构建
   workflow_dispatch:
 
 jobs:
@@ -13,9 +15,8 @@ jobs:
       matrix:
         include:
           # ---------------- WINDOWS ----------------
-          - { name: "win-x86",    os: windows-latest, qt_arch: "win32_msvc2019", qt_platform: "windows", vc_arch: "x86" }
-          - { name: "win-x64",    os: windows-latest, qt_arch: "win64_msvc2019_64", qt_platform: "windows", vc_arch: "x64" }
-          - { name: "win-arm64",  os: windows-latest, qt_arch: "win64_msvc2019_arm64", qt_platform: "windows", vc_arch: "amd64_arm64" }
+          - { name: "win-x86",    os: windows-latest, qt_arch: "win32_msvc2019", qt_platform: "windows", msvc_arch: "x86" }
+          - { name: "win-x64",    os: windows-latest, qt_arch: "win64_msvc2019_64", qt_platform: "windows", msvc_arch: "x64" }
 
           # ---------------- LINUX NATIVE ----------------
           - { name: "linux-x64", os: ubuntu-22.04, linux_arch: "x86_64" }
@@ -26,57 +27,63 @@ jobs:
           - { name: "linux-arm64", os: ubuntu-22.04, linux_arch: "aarch64" }
 
     steps:
-
     - name: Checkout
       uses: actions/checkout@v4
 
-    # =====================================================
-    # WINDOWS BUILDS
-    # =====================================================
-    - name: Install Qt (Windows)
+    # ================== 解析 Versions.cmake 生成版本号 ==================
+    - name: Generate Version
+      shell: bash
+      run: |
+        VER_MAJOR=$(grep WSJTX_VERSION_MAJOR Versions.cmake | awk '{print $2}')
+        VER_MINOR=$(grep WSJTX_VERSION_MINOR Versions.cmake | awk '{print $2}')
+        VER_SUB=$(grep WSJTX_VERSION_SUB Versions.cmake | awk '{print $2}')
+        VER_RC=$(grep WSJTX_RC Versions.cmake | awk '{print $2}')
+
+        if [ "$VER_RC" != "0" ]; then
+          VERSION="${VER_MAJOR}.${VER_MINOR}.${VER_SUB}-rc${VER_RC}"
+        else
+          VERSION="${VER_MAJOR}.${VER_MINOR}.${VER_SUB}"
+        fi
+
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "Building version: $VERSION"
+
+    # ================= WINDOWS QT INSTALL =================
+    - name: Install Qt (Windows only)
       if: matrix.qt_platform == 'windows'
-      shell: powershell
       run: |
         pip install aqtinstall
         aqt install-qt windows desktop 5.15.2 ${{ matrix.qt_arch }} -O C:\Qt
-        echo "QT_DIR=C:/Qt/5.15.2/${{ matrix.qt_arch }}" >> $env:GITHUB_ENV
+        echo "QT_DIR=C:\Qt\5.15.2\${{ matrix.qt_arch }}" >> $GITHUB_ENV
 
-    - name: Setup MSVC + Ninja (Windows)
-      if: matrix.qt_platform == 'windows'
-      uses: microsoft/setup-msbuild@v2
-
-    - name: Install Ninja
-      if: matrix.qt_platform == 'windows'
-      uses: ashutoshvarma/setup-ninja@v1
-
+    # ================= WINDOWS BUILD =================
     - name: Build Windows
       if: matrix.qt_platform == 'windows'
-      shell: powershell
+      shell: pwsh
       run: |
-        cmake -B build -G "Ninja" `
-          -DCMAKE_BUILD_TYPE=Release `
-          -DCMAKE_PREFIX_PATH="$env:QT_DIR"
+        cmake -B build -G "NMake Makefiles" `
+          -DCMAKE_PREFIX_PATH="$env:QT_DIR" `
+          -DCPACK_GENERATOR=ZIP `
+          -DPROJECT_VERSION=$env:VERSION
+
         cmake --build build --config Release
         cpack --config build/CPackConfig.cmake -B dist
 
-    # =====================================================
-    # LINUX DEPENDENCIES
-    # =====================================================
-    - name: Install Linux dependencies
+    # ================= LINUX DEPENDENCIES =================
+    - name: Install Linux build deps
       if: startsWith(matrix.os, 'ubuntu')
       run: |
         sudo dpkg --add-architecture i386 || true
         sudo apt update
-
         sudo apt install -y \
-          build-essential cmake ninja-build git pkg-config \
-          qtbase5-dev qttools5-dev qttools5-dev-tools qtmultimedia5-dev \
-          libqt5serialport5-dev libqt5svg5-dev \
-          gfortran libgfortran-11-dev \
-          libfftw3-dev libusb-1.0-0-dev libhamlib-dev \
-          portaudio19-dev libsamplerate0-dev libasound2-dev \
-          libudev-dev libcurl4-openssl-dev \
-          libboost-all-dev asciidoctor
+            build-essential cmake git pkg-config \
+            qtbase5-dev qttools5-dev qttools5-dev-tools qtmultimedia5-dev \
+            libqt5serialport5-dev libqt5svg5-dev qtwebsockets5-dev \
+            gfortran libgfortran-11-dev \
+            libfftw3-dev libusb-1.0-0-dev libhamlib-dev \
+            portaudio19-dev libsamplerate0-dev libasound2-dev \
+            libudev-dev libcurl4-openssl-dev \
+            libboost-all-dev asciidoctor
 
         if [ "${{ matrix.linux_arch }}" = "i386" ]; then
           sudo apt install -y gcc-multilib g++-multilib
@@ -90,40 +97,52 @@ jobs:
           sudo apt install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
         fi
 
-    # =====================================================
-    # LINUX BUILD
-    # =====================================================
+    # ================= LINUX BUILD =================
     - name: Build Linux
       if: startsWith(matrix.os, 'ubuntu')
       run: |
-        case "${{ matrix.linux_arch }}" in
-          i386)
-            export CC="gcc -m32"
-            export CXX="g++ -m32"
-            ;;
-          armhf)
-            export CC=arm-linux-gnueabihf-gcc
-            export CXX=arm-linux-gnueabihf-g++
-            ;;
-          aarch64)
-            export CC=aarch64-linux-gnu-gcc
-            export CXX=aarch64-linux-gnu-g++
-            ;;
-          *)
-            export CC=gcc
-            export CXX=g++
-            ;;
-        esac
+        if [ "${{ matrix.linux_arch }}" = "i386" ]; then
+          export CFLAGS="-m32"
+          export CXXFLAGS="-m32"
+          export LDFLAGS="-m32"
+        fi
+        if [ "${{ matrix.linux_arch }}" = "armhf" ]; then
+          export CC=arm-linux-gnueabihf-gcc
+          export CXX=arm-linux-gnueabihf-g++
+        fi
+        if [ "${{ matrix.linux_arch }}" = "aarch64" ]; then
+          export CC=aarch64-linux-gnu-gcc
+          export CXX=aarch64-linux-gnu-g++
+        fi
 
-        cmake -B build -G Ninja -DWSJT_SKIP_MANPAGES=ON
+        cmake -B build -DWSJT_SKIP_MANPAGES=ON -DPROJECT_VERSION=$VERSION
         cmake --build build -j$(nproc)
         cpack --config build/CPackConfig.cmake -B dist
 
-    # =====================================================
-    # UPLOAD
-    # =====================================================
+    # ================= 上传构建产物 =================
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.name }}
         path: dist/
+
+  # ================= 创建 Release 并附加所有包 =================
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: release_files
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ github.ref_name }}
+        name: "ATDX ${{ github.ref_name }}"
+        body: "Automated release for version ${{ github.ref_name }}"
+        draft: false
+        prerelease: false
+        files: release_files/**
