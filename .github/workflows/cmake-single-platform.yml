@@ -57,10 +57,12 @@ jobs:
         echo "QT_DIR=C:\Qt\5.15.2\${{ matrix.qt_arch }}" >> $GITHUB_ENV
 
     - name: Setup MSVC + Ninja
+      if: matrix.qt_platform == 'windows'
       uses: microsoft/setup-msbuild@v2
 
     - name: Install Ninja
-      uses: ashutoshvarma/setup-ninja@v1
+      if: matrix.qt_platform == 'windows'
+      uses: marcelbuesing/setup-ninja@v1
     # ================= WINDOWS BUILD =================
     - name: Build Windows
       if: matrix.qt_platform == 'windows'
