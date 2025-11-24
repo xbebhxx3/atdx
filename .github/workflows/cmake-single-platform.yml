@@ -111,7 +111,7 @@ jobs:
         sudo dpkg --add-architecture i386 || true
         sudo dpkg --add-architecture armhf || true
         sudo dpkg --add-architecture arm64 || true
-        sudo apt update
+        sudo apt update -y
         sudo apt install -y \
             build-essential cmake git pkg-config \
             qtbase5-dev qttools5-dev qttools5-dev-tools qtmultimedia5-dev \
@@ -121,7 +121,6 @@ jobs:
             portaudio19-dev libsamplerate0-dev libasound2-dev \
             libudev-dev libcurl4-openssl-dev \
             libboost-all-dev asciidoctor \
-            libhamlib-dev \
             libhamlib-utils
 
         if [ "${{ matrix.linux_arch }}" = "i386" ]; then
@@ -131,12 +130,21 @@ jobs:
             qtbase5-dev:i386 qttools5-dev:i386 qttools5-dev-tools:i386 qtmultimedia5-dev:i386 \
             libqt5serialport5-dev:i386 libqt5svg5-dev:i386 libqt5websockets5-dev:i386 \
             gfortran:i386 libgfortran-11-dev:i386 \
-            libfftw3-dev:i386 libusb-1.0-0-dev:i386 libhamlib-dev:i386 \
+            libfftw3-dev:i386 libusb-1.0-0-dev:i386 \
             portaudio19-dev:i386 libsamplerate0-dev:i386 libasound2-dev:i386 \
             libudev-dev:i386 libcurl4-openssl-dev:i386 \
-            libboost-all-dev:i386 asciidoctor:i386 \
-            libhamlib-dev:i386 \
-            libhamlib-utils:i386
+            libboost-all-dev:i386
+
+            sudo apt install -y build-essential git pkg-config libusb-1.0-0-dev
+
+            # 下载 libhamlib 源码
+            git clone https://github.com/Hamlib/Hamlib.git /tmp/hamlib
+            cd /tmp/hamlib
+
+            # 配置交叉编译
+            CC="gcc -m32" CXX="g++ -m32" ./configure --prefix=/usr/local
+            make -j$(nproc)
+            sudo make install
         fi
 
         if [ "${{ matrix.linux_arch }}" = "armhf" ]; then
@@ -145,10 +153,10 @@ jobs:
             qtbase5-dev:armhf qttools5-dev:armhf qttools5-dev-tools:armhf qtmultimedia5-dev:armhf \
             libqt5serialport5-dev:armhf libqt5svg5-dev:armhf libqt5websockets5-dev:armhf \
             gfortran:armhf libgfortran-11-dev:armhf \
-            libfftw3-dev:armhf libusb-1.0-0-dev:armhf libhamlib-dev:armhf \
+            libfftw3-dev:armhf libusb-1.0-0-dev:armhf \
             portaudio19-dev:armhf libsamplerate0-dev:armhf libasound2-dev:armhf \
             libudev-dev:armhf libcurl4-openssl-dev:armhf \
-            libboost-all-dev:armhf asciidoctor:armhf \
+            libboost-all-dev:armhf \
             libhamlib-dev:armhf \
             libhamlib-utils:armhf
         fi
@@ -159,10 +167,10 @@ jobs:
             qtbase5-dev:arm64 qttools5-dev:arm64 qttools5-dev-tools:arm64 qtmultimedia5-dev:arm64 \
             libqt5serialport5-dev:arm64 libqt5svg5-dev:arm64 libqt5websockets5-dev:arm64 \
             gfortran:arm64 libgfortran-11-dev:arm64 \
-            libfftw3-dev:arm64 libusb-1.0-0-dev:arm64 libhamlib-dev:arm64 \
+            libfftw3-dev:arm64 libusb-1.0-0-dev:arm64 \
             portaudio19-dev:arm64 libsamplerate0-dev:arm64 libasound2-dev:arm64 \
             libudev-dev:arm64 libcurl4-openssl-dev:arm64 \
-            libboost-all-dev:arm64 asciidoctor:arm64 \
+            libboost-all-dev:arm64 \
             libhamlib-dev:arm64 \
             libhamlib-utils:arm64
         fi
