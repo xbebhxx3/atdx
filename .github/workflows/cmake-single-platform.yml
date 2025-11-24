@@ -76,6 +76,11 @@ jobs:
       if: matrix.qt_platform == 'windows'
       shell: pwsh
       run: |
+        set(CPACK_PACKAGE_NAME "ATDX")
+        set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+        set(CPACK_GENERATOR "ZIP;NSIS")
+        set(CPACK_PACKAGE_CONTACT "admin@n103.top")
+        set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "ATDX - Multi-platform digital mode software")
         cmake -B build -G "Ninja" `
           -DCMAKE_PREFIX_PATH="$env:QT_DIR" `
           -DCPACK_GENERATOR=ZIP `
@@ -177,11 +182,23 @@ jobs:
         cpack --config build/CPackConfig.cmake -B dist
 
     # ================= 上传构建产物 =================
-    - name: Upload artifacts
+    - name: Upload linux
+      if: startsWith(matrix.os, 'ubuntu')
       uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.name }}
-        path: dist/
+        path: |
+        dist/*.deb
+        dist/*.rpm
+  
+    - name: Upload windows
+      if: startsWith(matrix.os, 'ubuntu')
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.name }}
+        path: |
+          dist/*.zip
+          dist/*.exe
 
   # ================= 创建 Release 并附加所有包 =================
   release:
