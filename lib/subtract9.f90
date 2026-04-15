@@ -1,5 +1,5 @@
 ! This source code file was last time modified by Igor UA3DJY on May 30th, 2017
-! All changes are shown in the patch file coming together with the full JTDX source code.
+! All changes are shown in the patch file coming together with the full atdx source code.
 
 subroutine subtract9(i4Decoded6BitWords,freq,drift,xdt,i4GrayCodedSym,hintdec)
 

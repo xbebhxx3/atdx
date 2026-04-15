@@ -144,7 +144,7 @@ signals:
   void tci_done3();
   
 protected:
-  int do_start (JTDXDateTime*) override;
+  int do_start (atdxDateTime*) override;
   void do_stop () override;
   void do_frequency (Frequency, MODE, bool no_ignore) override;
   void do_tx_frequency (Frequency, MODE, bool no_ignore) override;
@@ -272,7 +272,7 @@ private:
   bool busy_PTT_; 
   bool busy_rx2_;  
   QHash<QString,Tci_Cmd> mapCmd_;
-  JTDXDateTime * m_jtdxtime;
+  atdxDateTime * m_atdxtime;
   // from Detector
     void clear ();                // discard buffer contents
 

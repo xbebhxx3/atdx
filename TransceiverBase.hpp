@@ -7,7 +7,7 @@
 #include <QDir>
 #include <QStandardPaths>
 #include "Transceiver.hpp"
-#include "JTDXDateTime.h"
+#include "atdxDateTime.h"
 
 //
 // Base Transceiver Implementation
@@ -65,16 +65,16 @@ class TransceiverBase
 protected:
   TransceiverBase (QObject * parent)
     : Transceiver {parent}
-    , jtdxtime_ {nullptr}
+    , atdxtime_ {nullptr}
     , last_sequence_number_ {0}
-    , debug_file_ {QDir(QStandardPaths::writableLocation (QStandardPaths::DataLocation)).absoluteFilePath ("jtdx_debug.txt").toStdString()}
+    , debug_file_ {QDir(QStandardPaths::writableLocation (QStandardPaths::DataLocation)).absoluteFilePath ("atdx_debug.txt").toStdString()}
   {}
 
 public:
   //
   // Implement the Transceiver abstract interface.
   //
-  void start (unsigned sequence_number, JTDXDateTime* jtdxdatetime) noexcept override final;
+  void start (unsigned sequence_number, atdxDateTime* atdxdatetime) noexcept override final;
   void set (TransceiverState const&,
             unsigned sequence_number) noexcept override final;
   void stop () noexcept override final;
@@ -98,8 +98,8 @@ protected:
   // Template methods that sub classes implement to do what they need to do.
   //
   // These methods may throw exceptions to signal errors.
-  virtual int do_start (JTDXDateTime*) = 0;  // returns resolution, See Transceiver::resolution
-  virtual void do_post_start (JTDXDateTime*) {}
+  virtual int do_start (atdxDateTime*) = 0;  // returns resolution, See Transceiver::resolution
+  virtual void do_post_start (atdxDateTime*) {}
 
   virtual void do_stop () = 0;
   virtual void do_post_stop () {}
@@ -150,7 +150,7 @@ private:
   void startup ();
   void shutdown ();
   bool maybe_low_resolution (Frequency low_res, Frequency high_res);
-  JTDXDateTime * jtdxtime_;
+  atdxDateTime * atdxtime_;
   // use this convenience class to notify in update methods
   class may_update
   {

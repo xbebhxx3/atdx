@@ -6,7 +6,7 @@
 #include <QAudio>
 #include <QPointer>
 
-#include "JTDXDateTime.h"
+#include "atdxDateTime.h"
 #include "AudioDevice.hpp"
 
 class SoundOutput;
@@ -26,7 +26,7 @@ class Modulator
 public:
   enum ModulatorState {Synchronizing, Active, Idle};
 
-  Modulator (unsigned frameRate, double periodLengthInSeconds, JTDXDateTime * jtdxtime, QObject * parent = nullptr);
+  Modulator (unsigned frameRate, double periodLengthInSeconds, atdxDateTime * atdxtime, QObject * parent = nullptr);
 
   void close () override;
 
@@ -93,7 +93,7 @@ private:
   unsigned m_isym0;
   int m_j0;
   double m_toneFrequency0;
-  JTDXDateTime * m_jtdxtime;
+  atdxDateTime * m_atdxtime;
   std::string debug_file_;
 };
 

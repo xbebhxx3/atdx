@@ -1,5 +1,5 @@
 ! This source code file was last time modified by Igor UA3DJY on 20190708
-! All changes are shown in the patch file coming together with the full JTDX source code.
+! All changes are shown in the patch file coming together with the full atdx source code.
 
 subroutine gen_ft8wavesub(itone,f0,cwave)
 

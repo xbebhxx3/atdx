@@ -1,5 +1,5 @@
 // This source code file was last time modified by Arvo ES1JA on 20191202
-// All changes are shown in the patch file coming together with the full JTDX source code.
+// All changes are shown in the patch file coming together with the full atdx source code.
 
 #include "Radio.hpp"
 
@@ -85,9 +85,12 @@ namespace Radio
 
   bool is_callsign (QString const& callsign)
   {
-    if ((!callsign.at(1).isDigit() && callsign.size () == 2) || callsign == "F" || callsign == "G" || callsign == "I" || callsign == "K" || callsign == "W") {
-        auto call = callsign + "0";
-        return call.contains (valid_callsign_regexp);
+    if (callsign.isEmpty()) return false;
+    if (callsign.size() == 2 && !callsign.at(1).isDigit()) {
+        if (callsign == "F" || callsign == "G" || callsign == "I" || callsign == "K" || callsign == "W") {
+            QString call = callsign + "0";
+            return call.contains(valid_callsign_regexp);
+        }
     }
     else
         return callsign.contains (valid_callsign_regexp);

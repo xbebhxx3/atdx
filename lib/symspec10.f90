@@ -1,5 +1,5 @@
 ! This source code file was last time modified by Igor UA3DJY on May 16th, 2017
-! All changes are shown in the patch file coming together with the full JTDX source code.
+! All changes are shown in the patch file coming together with the full atdx source code.
 
 subroutine symspec10(c5,nz3d,nsps8,xdt,fsample,freq,drift,snrdb,schk,    &
      i1SoftSymbolsScrambled,qualf,syncro,mrs,mrs2,s3)

@@ -42,7 +42,7 @@ public:
 
 protected:
   // Implement the TransceiverBase interface.
-  int do_start (JTDXDateTime*) override;
+  int do_start (atdxDateTime*) override;
   void do_stop () override;
   void do_frequency (Frequency, MODE, bool no_ignore) override;
   void do_tx_frequency (Frequency, MODE, bool no_ignore) override;
@@ -194,7 +194,7 @@ private:
                                 // PTT - used to select rear audio.
 
   bool reversed_;               // True if VFOs are reversed.
-  JTDXDateTime * m_jtdxtime;
+  atdxDateTime * m_atdxtime;
 };
 
 #endif

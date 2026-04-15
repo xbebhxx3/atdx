@@ -1,4 +1,4 @@
-// Callsign database for JTDX software
+// Callsign database for atdx software
 // being used for filtering out some false FT8/FT4 decodes.
 // Contains 72460 callsigns spotted to http://pskreporter.info
 // in FT4/FT8 modes since 20211002.

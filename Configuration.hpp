@@ -9,7 +9,7 @@
 #include "AudioDevice.hpp"
 #include "TransceiverFactory.hpp"
 #include "Transceiver.hpp"
-#include "JTDXDateTime.h"
+#include "atdxDateTime.h"
 
 #include "pimpl_h.hpp"
 
@@ -299,7 +299,7 @@ public:
   // Close down connection to rig.
   void transceiver_offline ();
   void add_callsign_hideFilter (QString);
-  void set_jtdxtime (JTDXDateTime*);
+  void set_atdxtime (atdxDateTime*);
   // Set transceiver frequency in Hertz.
   Q_SLOT void transceiver_frequency (Frequency);
 

@@ -17,7 +17,7 @@ extern dec_data dec_data;
 
 CPlotter::CPlotter(QWidget *parent) :                  //CPlotter Constructor
   QFrame {parent},
-  m_jtdxtime {nullptr},
+  m_atdxtime {nullptr},
   m_bScaleOK {false},
   m_filter {false},
   m_fSpan {2000.0},
@@ -212,12 +212,12 @@ void CPlotter::draw(float swide[], bool bScroll)                            //dr
       painter1.setPen(Qt::white);
       QString t;
       if(m_TRperiod < 60.0) {
-        qint64 ms = m_jtdxtime->currentMSecsSinceEpoch2() % 86400000;
+        qint64 ms = m_atdxtime->currentMSecsSinceEpoch2() % 86400000;
         int n = fmod(0.001*ms,m_TRperiod);
-        QDateTime t1=m_jtdxtime->currentDateTimeUtc2().addSecs(-n);
+        QDateTime t1=m_atdxtime->currentDateTimeUtc2().addSecs(-n);
         t=t1.toString("hh:mm:ss") + "    " + m_rxBand;
       } else {
-        t=m_jtdxtime->currentDateTimeUtc2().toString("hh:mm") + "    " + m_rxBand;
+        t=m_atdxtime->currentDateTimeUtc2().toString("hh:mm") + "    " + m_rxBand;
       }
       QRect rect{5, -2, m_w-10, metrics.height()};
       QRect boundingRect;

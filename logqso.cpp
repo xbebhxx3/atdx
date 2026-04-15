@@ -7,7 +7,7 @@
 #include <QDir>
 #include <QDebug>
 
-#include "JTDXMessageBox.hpp"
+#include "atdxMessageBox.hpp"
 
 #include "logbook/adif.h"
 #include "Configuration.hpp"
@@ -16,17 +16,17 @@
 #include "ui_logqso.h"
 #include "moc_logqso.cpp"
 
-LogQSO::LogQSO(QSettings * settings, Configuration const * config, JTDXDateTime * jtdxtime, QWidget *parent)
+LogQSO::LogQSO(QSettings * settings, Configuration const * config, atdxDateTime * atdxtime, QWidget *parent)
   : QDialog(parent)
   , ui(new Ui::LogQSO)
   , m_settings (settings)
   , m_config {config}
-  , m_jtdxtime {jtdxtime}
+  , m_atdxtime {atdxtime}
 {
   ui->setupUi(this);
   ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("&OK"));
   ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("&Cancel"));
-//  setWindowTitle("JTDX " + versnumber.simplified () + " - Log QSO");
+//  setWindowTitle("atdx " + versnumber.simplified () + " - Log QSO");
   setWindowTitle(QCoreApplication::applicationName () + " v" + QCoreApplication::applicationVersion () + " - Log QSO");
 
   loadSettings ();
@@ -142,13 +142,13 @@ void LogQSO::accept()
   adifile.init(adifilePath);
   if (!adifile.addQSOToFile(hisCall,hisGrid,mode,rptSent,rptRcvd,m_dateTimeOn,m_dateTimeOff,band,comments,name,strDialFreq,m_myCall,m_myGrid,m_txPower,m_send_to_eqsl))
   {
-      JTDXMessageBox::information_message(0,"","Cannot open file \"" + adifilePath + "\".");
+      atdxMessageBox::information_message(0,"","Cannot open file \"" + adifilePath + "\".");
    }
 
 //Log this QSO to file "wsjtx.log"
   static QFile f {QDir {QStandardPaths::writableLocation (QStandardPaths::DataLocation)}.absoluteFilePath ("wsjtx.log")};
   if(!f.open(QIODevice::Text | QIODevice::Append)) {
-    JTDXMessageBox::information_message(0,"","Cannot open file \"" + f.fileName () + "\" for append:" + f.errorString ());
+    atdxMessageBox::information_message(0,"","Cannot open file \"" + f.fileName () + "\" for append:" + f.errorString ());
   } else {
     QString logEntry=m_dateTimeOn.date().toString("yyyy-MM-dd,") +
       m_dateTimeOn.time().toString("hh:mm:ss,") + 
@@ -202,7 +202,7 @@ void LogQSO::accept()
       myadif+=" <COMMENT:" + QString::number(comments.length()) + ">" + comments;
     }
     if (m_send_to_eqsl) {
-      myadif+=" <EQSL_QSL_SENT:1>Y <EQSL_QSLSDATE:8>" + m_jtdxtime->currentDateTimeUtc2().toString("yyyyMMdd");
+      myadif+=" <EQSL_QSL_SENT:1>Y <EQSL_QSLSDATE:8>" + m_atdxtime->currentDateTimeUtc2().toString("yyyyMMdd");
     }
     myadif+=" <EOR> ";
     myadif2 = myadif.trimmed().toUtf8();
@@ -218,12 +218,12 @@ void LogQSO::accept()
     if(m_debug) { 
       if(f2.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append)) fopen = true;
       else {
-      JTDXMessageBox::warning_message (0, "", " File Open Error "
+      atdxMessageBox::warning_message (0, "", " File Open Error "
                                   , tr ("Cannot open \"%1\" for append: %2")
                                   .arg (f2.fileName ()).arg (f2.errorString ()));
       }
     }
-    if(fopen)  { QTextStream out2(&f2); out2 << m_jtdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz") << "(" << m_jtdxtime->GetOffset() << ")" << " Connecting to " << m_tcp_server_name << ":" << m_tcp_server_port <<
+    if(fopen)  { QTextStream out2(&f2); out2 << m_atdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz") << "(" << m_atdxtime->GetOffset() << ")" << " Connecting to " << m_tcp_server_name << ":" << m_tcp_server_port <<
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
                  endl;
 #else
@@ -233,7 +233,7 @@ void LogQSO::accept()
     socket.connectToHost(m_tcp_server_name, m_tcp_server_port);
     if (socket.waitForConnected(1000)) {
       socket.write(myadif2);
-      if(fopen) { QTextStream out2(&f2); out2 << m_jtdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz") << "(" << m_jtdxtime->GetOffset() << ")" << " Host connected, sent message: " << myadif2 <<
+      if(fopen) { QTextStream out2(&f2); out2 << m_atdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz") << "(" << m_atdxtime->GetOffset() << ")" << " Host connected, sent message: " << myadif2 <<
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
                  endl;
 #else
@@ -242,7 +242,7 @@ void LogQSO::accept()
  }
       if (socket.waitForReadyRead(1000)){
         myadif2 = socket.readAll();
-        if(fopen) { QTextStream out2(&f2); out2 << m_jtdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz") << "(" << m_jtdxtime->GetOffset() << ")" << " Received response from host: " << myadif2 <<
+        if(fopen) { QTextStream out2(&f2); out2 << m_atdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz") << "(" << m_atdxtime->GetOffset() << ")" << " Received response from host: " << myadif2 <<
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
                  endl;
 #else
@@ -250,10 +250,10 @@ void LogQSO::accept()
 #endif
  }
         if (myadif2.left(3) == "NAK") {
-          JTDXMessageBox::critical_message(0, "",myadif2 + " QSO data rejected by external software");
+          atdxMessageBox::critical_message(0, "",myadif2 + " QSO data rejected by external software");
         }
       } else {
-      if(fopen) { QTextStream out2(&f2); out2 << m_jtdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz") << "(" << m_jtdxtime->GetOffset() << ")" << " Getting response from host is timed out" <<
+      if(fopen) { QTextStream out2(&f2); out2 << m_atdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz") << "(" << m_atdxtime->GetOffset() << ")" << " Getting response from host is timed out" <<
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
                  endl;
 #else
@@ -263,14 +263,14 @@ void LogQSO::accept()
       }  
       socket.close();
     } else {
-      if(fopen) { QTextStream out2(&f2); out2 << m_jtdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz") << "(" << m_jtdxtime->GetOffset() << ")" << " Host connection timed out" <<
+      if(fopen) { QTextStream out2(&f2); out2 << m_atdxtime->currentDateTimeUtc2().toString("yyyyMMdd_hhmmss.zzz") << "(" << m_atdxtime->GetOffset() << ")" << " Host connection timed out" <<
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
                  endl;
 #else
                  Qt::endl;
 #endif
  }
-      JTDXMessageBox::critical_message(0, "", "TCP QSO data transfer: " + socket.errorString());
+      atdxMessageBox::critical_message(0, "", "TCP QSO data transfer: " + socket.errorString());
     }
     if(fopen) f2.close();
   }

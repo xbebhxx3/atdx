@@ -1,5 +1,5 @@
 ! This source code file was last time modified by Igor UA3DJY on 20181215
-! All changes are shown in the patch file coming together with the full JTDX source code.
+! All changes are shown in the patch file coming together with the full atdx source code.
 
 subroutine hintdx7310(mrs,mrs2,mycall,hiscall,decoded,hintdec,s3,i4GrayCodedSym)
 

@@ -11,7 +11,7 @@ extern "C" {
 extern dec_data dec_data;
 
 Detector::Detector (unsigned frameRate, double periodLengthInSeconds,
-                    JTDXDateTime * jtdxtime, unsigned downSampleFactor, QObject * parent)
+                    atdxDateTime * atdxtime, unsigned downSampleFactor, QObject * parent)
   : AudioDevice (parent)
   , m_frameRate (frameRate)
   , m_period (periodLengthInSeconds)
@@ -21,7 +21,7 @@ Detector::Detector (unsigned frameRate, double periodLengthInSeconds,
   , m_buffer ((downSampleFactor > 1) ?
               new short [max_buffer_size * downSampleFactor] : nullptr)
   , m_bufferPos (0)
-  , m_jtdxtime {jtdxtime}
+  , m_atdxtime {atdxtime}
 {
   (void)m_frameRate;            // quell compiler warning
   clear ();
@@ -56,12 +56,12 @@ void Detector::clear ()
 qint64 Detector::writeData (char const * data, qint64 maxSize)
 {
   static unsigned mstr0=999999;
-  qint64 ms0 = m_jtdxtime -> currentMSecsSinceEpoch2() % 86400000;
+  qint64 ms0 = m_atdxtime -> currentMSecsSinceEpoch2() % 86400000;
   unsigned mstr = ms0 % int(1000.0*m_period); // ms into the nominal Tx start time
   if(mstr < mstr0) {              //When mstr has wrapped around to 0, restart the buffer
     dec_data.params.kin = 0;
     m_bufferPos = 0;
-//    printf("%s(%0.1f) reset buffer mstr:%d mstr0:%d maxSize:%lld\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_jtdxtime->GetOffset(),mstr,mstr0,maxSize);
+//    printf("%s(%0.1f) reset buffer mstr:%d mstr0:%d maxSize:%lld\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_atdxtime->GetOffset(),mstr,mstr0,maxSize);
   }
   mstr0=mstr;
 
@@ -102,9 +102,9 @@ qint64 Detector::writeData (char const * data, qint64 maxSize)
             // qDebug() << "secondInPeriod      = " << secondInPeriod();
             // qDebug() << "framesAfterDownSample" << framesAfterDownSample;
           }
-//    printf("%s(%0.1f) frameswritten %d\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_jtdxtime->GetOffset(),dec_data.params.kin);
+//    printf("%s(%0.1f) frameswritten %d\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_atdxtime->GetOffset(),dec_data.params.kin);
           Q_EMIT framesWritten (dec_data.params.kin);
-//    printf("%s(%0.1f) frameswritten done\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_jtdxtime->GetOffset());
+//    printf("%s(%0.1f) frameswritten done\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_atdxtime->GetOffset());
           m_bufferPos = 0;
         }
 

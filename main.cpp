@@ -28,7 +28,7 @@
 #include <QRandomGenerator>
 #endif
 
-#include "JTDXMessageBox.hpp"
+#include "atdxMessageBox.hpp"
 #include "revision_utils.hpp"
 #include "MetaDataRegistry.hpp"
 #include "SettingsGroup.hpp"
@@ -74,12 +74,12 @@ namespace
         }
       catch (std::exception const& e)
         {
-          JTDXMessageBox::critical_message (nullptr, "", translate ("main", "Fatal error"), e.what ());
+          atdxMessageBox::critical_message (nullptr, "", translate ("main", "Fatal error"), e.what ());
           throw;
         }
       catch (...)
         {
-          JTDXMessageBox::critical_message (nullptr, "", translate ("main", "Unexpected fatal error"));
+          atdxMessageBox::critical_message (nullptr, "", translate ("main", "Unexpected fatal error"));
           throw;
         }
     }
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
   register_types ();            // make the Qt magic happen
 
   // Multiple instances:
-  QSharedMemory mem_jtdxjt9;
+  QSharedMemory mem_atdxjt9;
 
   auto const env = QProcessEnvironment::systemEnvironment ();
 
@@ -119,16 +119,16 @@ int main(int argc, char *argv[])
                                    // that GUI has correct l18n
 
       // Override programs executable basename as application name.
-      a.setApplicationName ("JTDX");
+      a.setApplicationName ("atdx");
       a.setApplicationVersion (version ());
   if (version().replace("_32A","").indexOf("_") > 1) {
     #include <QDate>
     auto expire_date = QLocale(QLocale::English).toDate(QString(__DATE__).replace("  "," "),"MMM d yyyy").addMonths(3);
     if (QDate().currentDate() > expire_date) {
-      JTDXMessageBox::critical_message (nullptr, a.applicationName(), "Release candidate expired on " + expire_date.toString("dd.MM.yyyy"));
+      atdxMessageBox::critical_message (nullptr, a.applicationName(), "Release candidate expired on " + expire_date.toString("dd.MM.yyyy"));
           return -1;
     } else if (QDate().currentDate().addDays(5) > expire_date) {
-      JTDXMessageBox::information_message (nullptr, a.applicationName(), "Release candidate will expire on " + expire_date.toString("dd.MM.yyyy"));
+      atdxMessageBox::information_message (nullptr, a.applicationName(), "Release candidate will expire on " + expire_date.toString("dd.MM.yyyy"));
     }
   }
       bool multiple {false};
@@ -156,19 +156,19 @@ int main(int argc, char *argv[])
 
       if (!parser.parse (a.arguments ()))
         {
-          JTDXMessageBox::critical_message (nullptr, a.applicationName (), parser.errorText ());
+          atdxMessageBox::critical_message (nullptr, a.applicationName (), parser.errorText ());
           return -1;
         }
       else
         {
           if (parser.isSet (help_option))
             {
-              JTDXMessageBox::information_message (nullptr, a.applicationName (), parser.helpText ());
+              atdxMessageBox::information_message (nullptr, a.applicationName (), parser.helpText ());
               return 0;
             }
           else if (parser.isSet (version_option))
             {
-              JTDXMessageBox::information_message (nullptr, a.applicationName (), a.applicationVersion ());
+              atdxMessageBox::information_message (nullptr, a.applicationName (), a.applicationVersion ());
               return 0;
             }
         }
@@ -205,19 +205,19 @@ int main(int argc, char *argv[])
         {
           if (QLockFile::LockFailedError == instance_lock.error ())
             {
-              auto button = JTDXMessageBox::query_message (nullptr
+              auto button = atdxMessageBox::query_message (nullptr
                                                    , QApplication::applicationName ()
                                                    , QObject::tr ("Another instance may be running, try to remove stale lock file?")
                                                    , "" ,""
-                                                   , JTDXMessageBox::Yes | JTDXMessageBox::Retry | JTDXMessageBox::No
-                                                   , JTDXMessageBox::Yes);
+                                                   , atdxMessageBox::Yes | atdxMessageBox::Retry | atdxMessageBox::No
+                                                   , atdxMessageBox::Yes);
               switch (button)
                 {
-                case JTDXMessageBox::Yes:
+                case atdxMessageBox::Yes:
                   instance_lock.removeStaleLockFile ();
                   break;
 
-                case JTDXMessageBox::Retry:
+                case atdxMessageBox::Retry:
                   break;
 
                 default:
@@ -289,7 +289,7 @@ int main(int argc, char *argv[])
           // translations  but   should  only  be  set   when  adding  new
           // languages.  The  resulting .ts  files should be  checked info
           // source control for translators to access and update.
-          has_style = translator_from_resources.load (localeUsedToDeterminateTranslators, "jtdx", "_", ":/Translations");
+          has_style = translator_from_resources.load (localeUsedToDeterminateTranslators, "atdx", "_", ":/Translations");
           if (has_style) {
               resources_OK = a.installTranslator (&translator_from_resources);
           } 
@@ -298,10 +298,10 @@ int main(int argc, char *argv[])
           // using the locale name. This allows translators to easily test
           // their translations  by releasing  (lrelease) a .qm  file into
           // the    current    directory     with    a    suitable    name
-          // (e.g.  jtdx_et_EE.qm),  then  running   wsjtx  to  view  the
+          // (e.g.  atdx_et_EE.qm),  then  running   wsjtx  to  view  the
           // results. Either the system  locale setting or the environment
           // variable LANG can be used to select the target language.
-          has_style = translator_from_files.load (QString {"jtdx_"} + localeUsedToDeterminateTranslators.name ());
+          has_style = translator_from_files.load (QString {"atdx_"} + localeUsedToDeterminateTranslators.name ());
           if (has_style) {
               files_OK = a.installTranslator (&translator_from_files);
           }
@@ -309,15 +309,15 @@ int main(int argc, char *argv[])
         // Create and initialize shared memory segment
         // Multiple instances: use rig_name as shared memory key
 
-        mem_jtdxjt9.setKey(a.applicationName ());
+        mem_atdxjt9.setKey(a.applicationName ());
 
-        if(!mem_jtdxjt9.attach()) {
-          if (!mem_jtdxjt9.create(sizeof(struct dec_data))) {
-            JTDXMessageBox::critical_message (nullptr, "Error", "Unable to create shared memory segment.");
+        if(!mem_atdxjt9.attach()) {
+          if (!mem_atdxjt9.create(sizeof(struct dec_data))) {
+            atdxMessageBox::critical_message (nullptr, "Error", "Unable to create shared memory segment.");
             exit(1);
           }
         }
-        memset(mem_jtdxjt9.data(),0,sizeof(struct dec_data)); //Zero all decoding params in shared memory
+        memset(mem_atdxjt9.data(),0,sizeof(struct dec_data)); //Zero all decoding params in shared memory
 
         unsigned downSampleFactor;
         {
@@ -336,7 +336,7 @@ int main(int argc, char *argv[])
                                              ).toBool () ? 1u : 4u;
         }
 
-        MainWindow w(multiple, &settings, &mem_jtdxjt9, downSampleFactor, new QNetworkAccessManager {&a}, env);
+        MainWindow w(multiple, &settings, &mem_atdxjt9, downSampleFactor, new QNetworkAccessManager {&a}, env);
         w.show();
 
         QObject::connect (&a, SIGNAL (lastWindowClosed()), &a, SLOT (quit()));
@@ -348,12 +348,12 @@ int main(int argc, char *argv[])
     }
   catch (std::exception const& e)
     {
-      JTDXMessageBox::critical_message (nullptr, a.applicationName (), e.what ());
+      atdxMessageBox::critical_message (nullptr, a.applicationName (), e.what ());
       std::cerr << "Error: " << e.what () << '\n';
     }
   catch (...)
     {
-      JTDXMessageBox::critical_message (nullptr, a.applicationName (), QObject::tr ("Unexpected error"));
+      atdxMessageBox::critical_message (nullptr, a.applicationName (), QObject::tr ("Unexpected error"));
       std::cerr << "Unexpected error\n";
       throw;			// hoping the runtime might tell us more about the exception
     }

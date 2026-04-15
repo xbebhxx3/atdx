@@ -1,5 +1,5 @@
 ! This source code file was last time modified by Igor UA3DJY on August 19th, 2017
-! All changes are shown in the patch file coming together with the full JTDX source code.
+! All changes are shown in the patch file coming together with the full atdx source code.
 
 subroutine decode65b(s2,s2b,s2c,ntrials,hint_on,mycall,hiscall,hisgrid,nft,decoded,hintedrxfreq,hint, &
            npass1,hintedw,bypass_hintcq,bypass_hintall,bypass_ftrsd,offset1,nstophint,freemsg,hinteddyn,&

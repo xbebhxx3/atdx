@@ -49,15 +49,15 @@ DXLabSuiteCommanderTransceiver::DXLabSuiteCommanderTransceiver (std::unique_ptr<
   , use_for_ptt_ {use_for_ptt}
   , server_ {address}
   , commander_ {nullptr}
-  , m_jtdxtime {nullptr}
+  , m_atdxtime {nullptr}
 {
 }
 
-int DXLabSuiteCommanderTransceiver::do_start (JTDXDateTime * jtdxtime)
+int DXLabSuiteCommanderTransceiver::do_start (atdxDateTime * atdxtime)
 {
   TRACE_CAT ("DXLabSuiteCommanderTransceiver", "starting");
-  m_jtdxtime = jtdxtime;
-  if (wrapped_) wrapped_->start (0,m_jtdxtime);
+  m_atdxtime = atdxtime;
+  if (wrapped_) wrapped_->start (0,m_atdxtime);
 
   auto server_details = network_server_lookup (server_, 52002u, QHostAddress::LocalHost, QAbstractSocket::IPv4Protocol);
 

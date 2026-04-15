@@ -43,7 +43,7 @@ protected:
   // in a non-intrusive manner.
   virtual void do_poll () = 0;
 
-  void do_post_start (JTDXDateTime*) override final;
+  void do_post_start (atdxDateTime*) override final;
   void do_post_stop () override final;
   void do_post_frequency (Frequency, MODE) override final;
   void do_post_tx_frequency (Frequency, MODE) override final;
@@ -73,7 +73,7 @@ private:
 
   unsigned retries_;            // number of incorrect polls left
   std::string debug_file_;
-  JTDXDateTime * m_jtdxtime;
+  atdxDateTime * m_atdxtime;
 
 };
 

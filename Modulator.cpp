@@ -25,7 +25,7 @@ extern float gran();		// Noise generator (for tests only)
 
 double constexpr Modulator::m_twoPi;
 
-Modulator::Modulator (unsigned frameRate, double periodLengthInSeconds, JTDXDateTime * jtdxtime, QObject * parent)
+Modulator::Modulator (unsigned frameRate, double periodLengthInSeconds, atdxDateTime * atdxtime, QObject * parent)
   : AudioDevice {parent}
   , m_quickClose {false}
   , m_phi {0.0}
@@ -38,8 +38,8 @@ Modulator::Modulator (unsigned frameRate, double periodLengthInSeconds, JTDXDate
   , m_cwLevel {false}
   , m_j0 {-1}
   , m_toneFrequency0 {1500.0}
-  , m_jtdxtime {jtdxtime}
-  , debug_file_ {QDir(QStandardPaths::writableLocation (QStandardPaths::DataLocation)).absoluteFilePath ("jtdx_debug.txt").toStdString()}
+  , m_atdxtime {atdxtime}
+  , debug_file_ {QDir(QStandardPaths::writableLocation (QStandardPaths::DataLocation)).absoluteFilePath ("atdx_debug.txt").toStdString()}
 {
 }
 
@@ -50,15 +50,15 @@ void Modulator::start (unsigned symbolsLength, double framesPerSymbol,
 {
   QThread::currentThread()->setPriority(QThread::HighPriority);
   Q_ASSERT (stream);
-#if JTDX_DEBUG_TO_FILE
+#if atdx_DEBUG_TO_FILE
   FILE * pFile = fopen (debug_file_.c_str(),"a");
   fprintf (pFile,"\n");
   fclose (pFile);
 #endif
 
 // Time according to this computer which becomes our base time
-  qint64 ms0 = m_jtdxtime->currentMSecsSinceEpoch2() % 86400000;
-//  qDebug() << "ModStart" << m_jtdxtime->currentDateTimeUtc().toString("hh:mm:ss.sss");
+  qint64 ms0 = m_atdxtime->currentMSecsSinceEpoch2() % 86400000;
+//  qDebug() << "ModStart" << m_atdxtime->currentDateTimeUtc().toString("hh:mm:ss.sss");
   unsigned mstr = ms0 % int(1000.0*m_period); // ms into the nominal Tx start time
   if (m_state != Idle) stop ();
   m_quickClose = false;
@@ -97,10 +97,10 @@ void Modulator::start (unsigned symbolsLength, double framesPerSymbol,
   if (m_ic == 0 && synchronize && !m_tuning)	{
     m_silentFrames = m_frameRate / (1000 / delay_ms) - (mstr * (m_frameRate / 1000));
   }
-//  printf ("%s(%0.1f) Modulator startdelay_ms=%d m_frameRate=%d mstr=%d mstr2 = %d m_ic=%d m_silentFrames=%lld \n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_jtdxtime->GetOffset(),delay_ms,m_frameRate,mstr,mstr2,m_ic,m_silentFrames);
-#if JTDX_DEBUG_TO_FILE
+//  printf ("%s(%0.1f) Modulator startdelay_ms=%d m_frameRate=%d mstr=%d mstr2 = %d m_ic=%d m_silentFrames=%lld \n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_atdxtime->GetOffset(),delay_ms,m_frameRate,mstr,mstr2,m_ic,m_silentFrames);
+#if atdx_DEBUG_TO_FILE
   pFile = fopen (debug_file_.c_str(),"a");  
-  fprintf (pFile,"%s(%0.1f) Modulator startdelay_ms=%d m_frameRate=%d mstr=%d mstr2 = %d m_ic=%d m_silentFrames=%lld \n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_jtdxtime->GetOffset(),delay_ms,m_frameRate,mstr,mstr2,m_ic,m_silentFrames);
+  fprintf (pFile,"%s(%0.1f) Modulator startdelay_ms=%d m_frameRate=%d mstr=%d mstr2 = %d m_ic=%d m_silentFrames=%lld \n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_atdxtime->GetOffset(),delay_ms,m_frameRate,mstr,mstr2,m_ic,m_silentFrames);
   fclose (pFile);
 #endif
   initialize (QIODevice::ReadOnly, channel);
@@ -112,10 +112,10 @@ void Modulator::start (unsigned symbolsLength, double framesPerSymbol,
 
 void Modulator::tune (bool newState)
 {
-//  printf("%s(%0.1f) Modulator tune %d ->%d\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_jtdxtime->GetOffset(),m_tuning,newState);
-#if JTDX_DEBUG_TO_FILE
+//  printf("%s(%0.1f) Modulator tune %d ->%d\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_atdxtime->GetOffset(),m_tuning,newState);
+#if atdx_DEBUG_TO_FILE
   FILE * pFile = fopen (debug_file_.c_str(),"a");  
-  fprintf (pFile,"%s(%0.1f) Modulator tune %d ->%d\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_jtdxtime->GetOffset(),m_tuning,newState);
+  fprintf (pFile,"%s(%0.1f) Modulator tune %d ->%d\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_atdxtime->GetOffset(),m_tuning,newState);
   fclose (pFile);
 #endif
   m_tuning = newState;
@@ -207,10 +207,10 @@ qint64 Modulator::readData (char * data, qint64 maxSize)
               ++framesGenerated;
               ++m_ic;
             } else {
-//              printf("%s(%0.1f) Modulator Idle1 %lld frames generated\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_jtdxtime->GetOffset(),framesGenerated);
-#if JTDX_DEBUG_TO_FILE
+//              printf("%s(%0.1f) Modulator Idle1 %lld frames generated\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_atdxtime->GetOffset(),framesGenerated);
+#if atdx_DEBUG_TO_FILE
               FILE * pFile = fopen (debug_file_.c_str(),"a");  
-              fprintf (pFile,"%s(%0.1f) Modulator Idle1 %lld frames generated\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_jtdxtime->GetOffset(),framesGenerated);
+              fprintf (pFile,"%s(%0.1f) Modulator Idle1 %lld frames generated\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_atdxtime->GetOffset(),framesGenerated);
               fclose (pFile);
 #endif
               Q_EMIT stateChanged ((m_state = Idle));
@@ -291,10 +291,10 @@ qint64 Modulator::readData (char * data, qint64 maxSize)
         if (m_amp == 0.0) { // TODO G4WJS: compare double with zero might not be wise
           if (icw[0] == 0) {
             // no CW ID to send
-//            printf("%s(%0.1f) Modulator Idle2 %lld frames generated\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_jtdxtime->GetOffset(),framesGenerated);
-#if JTDX_DEBUG_TO_FILE
+//            printf("%s(%0.1f) Modulator Idle2 %lld frames generated\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_atdxtime->GetOffset(),framesGenerated);
+#if atdx_DEBUG_TO_FILE
             FILE * pFile = fopen (debug_file_.c_str(),"a");  
-            fprintf (pFile,"%s(%0.1f) Modulator Idle2 %lld frames generated\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_jtdxtime->GetOffset(),framesGenerated);
+            fprintf (pFile,"%s(%0.1f) Modulator Idle2 %lld frames generated\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_atdxtime->GetOffset(),framesGenerated);
             fclose (pFile);
 #endif
             Q_EMIT stateChanged ((m_state = Idle));
@@ -306,10 +306,10 @@ qint64 Modulator::readData (char * data, qint64 maxSize)
         m_frequency0 = m_frequency;
         // done for this chunk - continue on next call
         if (samples != end && framesGenerated) {
-//          printf("%s(%0.1f) Modulator Idle3 %lld frames generated\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_jtdxtime->GetOffset(),framesGenerated);
-#if JTDX_DEBUG_TO_FILE
+//          printf("%s(%0.1f) Modulator Idle3 %lld frames generated\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_atdxtime->GetOffset(),framesGenerated);
+#if atdx_DEBUG_TO_FILE
           FILE * pFile = fopen (debug_file_.c_str(),"a");  
-          fprintf (pFile,"%s(%0.1f) Modulator Idle3 %lld frames generated\n",m_jtdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_jtdxtime->GetOffset(),framesGenerated);
+          fprintf (pFile,"%s(%0.1f) Modulator Idle3 %lld frames generated\n",m_atdxtime->currentDateTimeUtc2().toString("hh:mm:ss.zzz").toStdString().c_str(),m_atdxtime->GetOffset(),framesGenerated);
           fclose (pFile);
 #endif
         }

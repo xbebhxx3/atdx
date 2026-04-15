@@ -23,7 +23,7 @@ CAboutDlg::CAboutDlg(QWidget *parent) :
                          "WSPR code is forked from WSJT-X v2.1.2, <br>"
                          "&copy; 2001-2022 by Joe Taylor, K1JT, Bill Somerville, G4WJS, <br>"
                          "Steve Franke, K9AN, and Nico Palermo, IV3NWV.<br><br>"
-                         "JTDX supports FT8, FT4, JT9, T10 and JT65A digital modes for HF <br>"
+                         "atdx supports FT8, FT4, JT9, T10 and JT65A digital modes for HF <br>"
                          "amateur radio communication, focused on DXing <br>"
                          "and being shaped by community of DXers. <br>"
                          "&copy; 2016-2022 by Igor Chernikov, UA3DJY, and Arvo Järve, ES1JA. <br>"
@@ -34,7 +34,7 @@ CAboutDlg::CAboutDlg(QWidget *parent) :
                          "SM0LTV, SP2L, SV1IYF, UA3ALE, US-E-12, VE3NEA, VK3AMA, VK6KXW, VK7YUM, VR2UPU,<br>"
                          "W9MDB, YL3GBC family and LY3BG family: Vytas and Rimas Kudelis. <br><br>"
                          "<br><br>"
-                         "JTDX is licensed under the terms of Version3<br>"
+                         "atdx is licensed under the terms of Version3<br>"
                          "of the GNU General Public License(GPL)<br>"
                          "<a href=\"https://www.gnu.org/licenses/gpl-3.0.txt\">"
                          "https://www.gnu.org/licenses/gpl-3.0.txt</a>");

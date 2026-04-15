@@ -1,5 +1,5 @@
 ! This source code file was last time modified by Igor UA3DJY on July 26th, 2017
-! All changes are shown in the patch file coming together with the full JTDX source code.
+! All changes are shown in the patch file coming together with the full atdx source code.
 
 subroutine sync65(ss,ss22,fmask,nfa,nfb,ncand,npass1, &
                   nfqso,hint_on,nfhinted,thresh0,ncandth25,ipass)

@@ -1,0 +1,29 @@
+:doctype: manpage
+:man source: AsciiDoc
+:man version: {revnumber}
+:man manual: atdx Manual
+= rigctl-atdx(1)
+
+== NAME
+
+rigctl-atdx - Hamlib 3 rigctld server.
+
+== SYNOPSIS
+
+*rigctl-atdx* [OPTIONS]
+
+== DESCRIPTION
+
+*atdx* uses a version of the *hamlib* CAT control library.  This
+ library is heavily modified over the current release version of
+ *hamlib*. If a *atdx* user wishes to use the *hamlib* network rig
+ server *rigctld* to remotely control their transceiver; then this
+ special version of the *rigctl* client should be used since that too
+ has the modified *hamlib* code embedded with it.
+
+atdx home page:: https://atdx.tech/en/videos-guides
+
+atdx User's Guide:: https://atdx.tech/en/videos-guides
+
+== OPTIONS
+Refer to the *hamlib* documentation.

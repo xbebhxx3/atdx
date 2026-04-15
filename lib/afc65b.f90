@@ -1,5 +1,5 @@
 ! This source code file was last time modified by Igor UA3DJY on December 28th, 2016.
-! All changes are shown in the patch file coming together with the full JTDX source code.
+! All changes are shown in the patch file coming together with the full atdx source code.
 
 subroutine afc65b(c5x,npts,fsample,a,ccfbest,dtbest)
 

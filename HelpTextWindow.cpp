@@ -4,7 +4,7 @@
 #include <QString>
 #include <QPalette>
 
-#include "JTDXMessageBox.hpp"
+#include "atdxMessageBox.hpp"
 #include "qt_helpers.hpp"
 //#include "moc_HelpTextWindow.cpp"
 

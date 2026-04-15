@@ -1,5 +1,5 @@
 ! This source code file is last time mofified by Igor UA3DJY on March 10th, 2017 
-! All changes are shown in the patch file coming together with the full JTDX source code.
+! All changes are shown in the patch file coming together with the full atdx source code.
 
 module jt65_mod4
 

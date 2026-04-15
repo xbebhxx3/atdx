@@ -488,7 +488,7 @@ void MessageClient::logged_ADIF (QByteArray const& ADIF_record)
     {
       QByteArray message;
       NetworkMessage::Builder out {&message, NetworkMessage::LoggedADIF, m_->id_, m_->schema_};
-      QByteArray ADIF {"\n<adif_ver:5>3.1.0\n<programid:4>JTDX\n<EOH>\n" + ADIF_record};
+      QByteArray ADIF {"\n<adif_ver:5>3.1.0\n<programid:4>atdx\n<EOH>\n" + ADIF_record};
       out << ADIF;
       m_->send_message (out, message);
     }

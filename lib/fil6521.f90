@@ -1,5 +1,5 @@
 ! This source code file was last time modified by Igor Chernikov UA3DJY on September 21st, 2016.
-! All changes are shown in the patch file coming together with the full JTDX source code.
+! All changes are shown in the patch file coming together with the full atdx source code.
 
 
 subroutine fil6521(c1,n1,c3,n2)

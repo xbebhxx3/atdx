@@ -1,5 +1,5 @@
 // This source code file was last time modified by Arvo ES1JA on January 29th, 2017
-// All changes are shown in the patch file coming together with the full JTDX source code.
+// All changes are shown in the patch file coming together with the full atdx source code.
 
 /*
  * Reads an ADIF log file into memory

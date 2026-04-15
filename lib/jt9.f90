@@ -1,9 +1,9 @@
 ! This source code file was last time modified by Igor UA3DJY on September 30th, 2018
-! All changes are shown in the patch file coming together with the full JTDX source code.
+! All changes are shown in the patch file coming together with the full atdx source code.
 
 program jt9
 
-! Decoder for JT9. Can run as the back end of JTDX only, with data placed in a shared memory region.
+! Decoder for JT9. Can run as the back end of atdx only, with data placed in a shared memory region.
 
   use options
   use prog_args

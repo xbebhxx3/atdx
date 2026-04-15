@@ -35,7 +35,7 @@ class HamlibTransceiver final
 
  private:
   void load_user_settings ();
-  int do_start (JTDXDateTime*) override;
+  int do_start (atdxDateTime*) override;
   void do_stop () override;
   void do_frequency (Frequency, MODE, bool no_ignore) override;
   void do_tx_frequency (Frequency, MODE, bool no_ignore) override;
@@ -74,7 +74,7 @@ class HamlibTransceiver final
   bool do_swr_;
   bool tickle_hamlib_;          // Hamlib requires a
                                 // rig_set_split_vfo() call to
-  JTDXDateTime * m_jtdxtime;                                // establish the Tx VFO
+  atdxDateTime * m_atdxtime;                                // establish the Tx VFO
   bool get_vfo_works_;          // Net rigctl promises what it can't deliver
   bool set_vfo_works_;          // More rigctl promises which it can't deliver
   std::string debug_file_;

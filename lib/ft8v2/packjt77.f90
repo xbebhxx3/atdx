@@ -542,7 +542,7 @@ subroutine unpack77(c77,nrx,msg,unpk77_success,nthr)
         if(ir.eq.0) msg=trim(call_1)//' '//trim(call_2)//' '//grid4
         if(ir.eq.1) msg=trim(call_1)//' '//trim(call_2)//' R '//grid4
         if(msg(1:3).eq.'CQ ' .and. ir.eq.1) unpk77_success=.false.
-!out of current realisation of protocol: GRID is always dropped at WSJT-X/JTDX transmission of the messages below
+!out of current realisation of protocol: GRID is always dropped at WSJT-X/atdx transmission of the messages below
 !           i3          n3
 !           1           0
 !110015 -23  0.5 1450 ~ <...> Y96IHQ/R GL12

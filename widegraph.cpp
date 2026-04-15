@@ -6,7 +6,7 @@
 #include "commons.h"
 #include "Configuration.hpp"
 #include "moc_widegraph.cpp"
-#include "JTDXMessageBox.hpp"
+#include "atdxMessageBox.hpp"
 static float swide[MAX_SCREENSIZE];
 
 namespace
@@ -14,7 +14,7 @@ namespace
   auto user_defined = QObject::tr ("User Defined");
 }
 
-WideGraph::WideGraph(QSettings * settings, JTDXDateTime * jtdxtime, QWidget *parent) :
+WideGraph::WideGraph(QSettings * settings, atdxDateTime * atdxtime, QWidget *parent) :
   QDialog(parent),
   ui(new Ui::WideGraph),
   m_settings (settings),
@@ -22,7 +22,7 @@ WideGraph::WideGraph(QSettings * settings, JTDXDateTime * jtdxtime, QWidget *par
   m_tr0 {0.0},
   m_lockTxFreq {false},
   m_filter {false},
-  m_jtdxtime {jtdxtime}
+  m_atdxtime {atdxtime}
 {
   ui->setupUi(this);
 
@@ -31,7 +31,7 @@ WideGraph::WideGraph(QSettings * settings, JTDXDateTime * jtdxtime, QWidget *par
   setMaximumWidth (MAX_SCREENSIZE);
   setMaximumHeight (880);
 
-  ui->widePlot->m_jtdxtime = m_jtdxtime;
+  ui->widePlot->m_atdxtime = m_atdxtime;
   ui->widePlot->setCursor(Qt::CrossCursor);
   ui->widePlot->setMaximumHeight(800);
   ui->widePlot->setCurrent(false);
@@ -236,7 +236,7 @@ void WideGraph::dataSink2(float s[], float df3, int ihsym, int ndiskdata)  //dat
     }
 
 // Time according to this computer
-    qint64 ms = m_jtdxtime->currentMSecsSinceEpoch2() % 86400000;
+    qint64 ms = m_atdxtime->currentMSecsSinceEpoch2() % 86400000;
     double tr = fmod(0.001*ms,m_TRperiod);
     if((ndiskdata && ihsym <= m_waterfallAvg) || (!ndiskdata && tr<m_tr0)) {
       float flagValue=1.0e30;
@@ -464,7 +464,7 @@ void WideGraph::readPalette ()                                   //readPalette
     }
   catch (std::exception const& e)
     {
-      JTDXMessageBox::critical_message (this, "WideGraph", e.what());
+      atdxMessageBox::critical_message (this, "WideGraph", e.what());
     }
 }
 
@@ -523,7 +523,7 @@ void WideGraph::on_adjust_palette_push_button_clicked (bool)   //Adjust Palette
     }
   catch (std::exception const& e)
     {
-      JTDXMessageBox::critical_message (this, "WideGraph",e.what());
+      atdxMessageBox::critical_message (this, "WideGraph",e.what());
     }
 }
 
